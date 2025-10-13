@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Visitor Safety & Emergency Tracking</title>
+    <style>
+      /* Page layout */
+      :root {
+        --bg: #fbf3ea;
+        --card: #fff;
+        --muted: #9aa6a3;
+        --accent: #2b6b6f;
+        --danger: #d9534f;
+        --success: #4caf50;
+        --pill: #eaf6f5;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: Inter, "Helvetica Neue", Arial;
+        background: var(--bg);
+        color: #1f2933;
+      }
+      .container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 260px;
+        background: #fff;
+        border-right: 1px solid #efe7df;
+        padding: 28px 20px;
+      }
+      .brand {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 18px;
+        margin-bottom: 18px;
+      }
+      .nav {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+      }
+      .nav li {
+        margin: 8px 0;
+      }
+      .nav a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: #617071;
+        text-decoration: none;
+      }
+      .nav a.active {
+        background: linear-gradient(90deg, #dff3f2, #eaf6f5);
+        color: var(--accent);
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+      }
+      .nav a .icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--pill);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      /* Main area */
+      .main {
+        flex: 1;
+        padding: 28px;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      h1 {
+        margin: 0;
+        font-size: 22px;
+      }
+      p.lead {
+        margin: 6px 0 18px;
+        color: #6b7a79;
+      }
+
+      /* KPIs */
+      .cards {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 6px 10px rgba(19, 15, 11, 0.03);
+        min-width: 160px;
+      }
+      .card .value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #14323a;
+      }
+      .card .label {
+        color: #7d8b8a;
+        font-size: 13px;
+      }
+
+      /* Emergency banner */
+      .banner {
+        background: linear-gradient(90deg, #f8d7da, #f6b6b6);
+        border-left: 6px solid #e35b59;
+        color: #7b2a2b;
+        padding: 14px;
+        border-radius: 8px;
+        margin: 18px 0;
+      }
+
+      /* Occupant list */
+      .panel {
+        background: #fff;
+        border-radius: 12px;
+        padding: 14px;
+        margin-top: 18px;
+      }
+      .panel h3 {
+        margin: 0 0 8px;
+      }
+      .occupant {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px;
+        border-radius: 10px;
+        background: #f6fbfb;
+        margin-bottom: 10px;
+      }
+      .left {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+      }
+      .meta {
+        display: flex;
+        flex-direction: column;
+      }
+      .meta .name {
+        font-weight: 600;
+      }
+      .meta .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .check {
+        color: #0a6b3a;
+        font-weight: 600;
+      }
+
+      /* Footer cards */
+      .footer-cards {
+        display: flex;
+        gap: 14px;
+        margin-top: 18px;
+      }
+      .small {
+        flex: 1;
+        padding: 14px;
+        border-radius: 10px;
+        background: var(--card);
+      }
+
+      /* Responsive */
+      @media (max-width: 900px) {
+        .sidebar {
+          display: none;
+        }
+        .container {
+          flex-direction: column;
+        }
+        .main {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <div class="brand">Site Safety — Portal</div>
+        <ul class="nav">
+          <li>
+            <a href="#" class="active"
+              ><span class="icon">S</span> <span>Safety Management</span></a
+            >
+          </li>
+          <li>
+            <a href="#"><span class="icon">V</span> <span>Visitor Log</span></a>
+          </li>
+          <li>
+            <a href="#"
+              ><span class="icon">E</span> <span>Emergency Contacts</span></a
+            >
+          </li>
+          <li>
+            <a href="#"
+              ><span class="icon">A</span> <span>Assembly Points</span></a
+            >
+          </li>
+        </ul>
+      </aside>
+
+      <main class="main">
+        <div class="top">
+          <div>
+            <h1>Visitor Safety & Emergency Tracking</h1>
+            <p class="lead">Monitor visitors and emergency headcount</p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <button
+              id="checkInBtn"
+              style="
+                background: #7cc28f;
+                border-radius: 8px;
+                padding: 10px 12px;
+                border: 0;
+                color: #fff;
+              "
+            >
+              Check In Visitor
+            </button>
+            <button
+              id="emergencyBtn"
+              style="
+                background: #b33b32;
+                border-radius: 8px;
+                padding: 10px 12px;
+                border: 0;
+                color: #fff;
+              "
+            >
+              Emergency Mode
+            </button>
+          </div>
+        </div>
+
+        <div class="cards" style="margin-top: 18px">
+          <div class="card">
+            <div class="label">Total in Building</div>
+            <div class="value" id="totalInBuilding">0</div>
+            <div class="muted">Employees + Visitors</div>
+          </div>
+          <div class="card">
+            <div class="label">Visitors Today</div>
+            <div class="value" id="visitorsToday">0</div>
+            <div class="muted" id="visitorsInsideMuted">0 currently inside</div>
+          </div>
+          <div class="card">
+            <div class="label">Avg. Visit Duration</div>
+            <div class="value" id="avgVisit">2.4h</div>
+            <div class="muted">Per visitor</div>
+          </div>
+          <div class="card">
+            <div class="label">Safety Compliance</div>
+            <div class="value" id="safetyCompliance">100%</div>
+            <div class="muted">All visitors logged</div>
+          </div>
+        </div>
+
+        <div
+          class="banner"
+          id="emergencyBanner"
+          role="status"
+          style="display: none"
+        >
+          <strong id="bannerTitle">EMERGENCY MODE ACTIVE</strong>
+          <div id="bannerText">
+            Building evacuation headcount system is active. Total occupants:
+            <span id="bannerCount">0</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>
+            All Occupants in Building
+            <span
+              id="occupantBadge"
+              style="
+                background: #e74c3c;
+                color: #fff;
+                border-radius: 12px;
+                padding: 4px 8px;
+                font-size: 12px;
+                margin-left: 8px;
+              "
+              >0 People</span
+            >
+          </h3>
+
+          <div
+            id="occupantList"
+            style="
+              max-height: 420px;
+              overflow: auto;
+              padding-right: 6px;
+              margin-top: 12px;
+            "
+          ></div>
+
+          <script>
+            // Initial dataset (matches the original static content)
+            const initialOccupants = [
+              {
+                id: "o1",
+                initials: "SJ",
+                name: "Sarah Johnson",
+                type: "employee",
+                meta: "Engineering • Floor 3",
+                time: "08:00 AM",
+              },
+              {
+                id: "o2",
+                initials: "MP",
+                name: "Mike Peters",
+                type: "employee",
+                meta: "Design • Floor 2 - Toilet",
+                time: "08:15 AM",
+              },
+              {
+                id: "o3",
+                initials: "EW",
+                name: "Emma Wilson",
+                type: "employee",
+                meta: "Marketing • Floor 2",
+                time: "08:30 AM",
+              },
+              {
+                id: "o4",
+                initials: "JB",
+                name: "James Brown",
+                type: "employee",
+                meta: "Sales • Floor 1",
+                time: "08:45 AM",
+              },
+              {
+                id: "o5",
+                initials: "LA",
+                name: "Lisa Anderson",
+                type: "employee",
+                meta: "HR • Floor 2",
+                time: "09:00 AM",
+              },
+              {
+                id: "o6",
+                initials: "JS",
+                name: "John Smith",
+                type: "visitor",
+                meta: "Tech Corp • Visiting Sarah Johnson",
+                time: "09:30 AM",
+              },
+              {
+                id: "o7",
+                initials: "ED",
+                name: "Emily Davis",
+                type: "visitor",
+                meta: "Design Studio • Visiting Mike Peters",
+                time: "10:15 AM",
+              },
+              {
+                id: "o8",
+                initials: "RW",
+                name: "Robert Wilson",
+                type: "visitor",
+                meta: "Consulting Inc • Visiting Emma Wilson",
+                time: "11:00 AM",
+              },
+              {
+                id: "o9",
+                initials: "MT",
+                name: "Michael Torres",
+                type: "visitor",
+                meta: "Legal Associates • Visiting Lisa Anderson",
+                time: "01:00 PM",
+              },
+            ];
+
+            const STORAGE_KEY = "safetyOccupants_v1";
+            let occupants = [];
+
+            function loadOccupants() {
+              const raw = localStorage.getItem(STORAGE_KEY);
+              if (raw) {
+                try {
+                  occupants = JSON.parse(raw);
+                } catch (e) {
+                  occupants = initialOccupants.slice();
+                }
+              } else {
+                occupants = initialOccupants.slice();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(occupants));
+              }
+            }
+
+            function saveOccupants() {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(occupants));
+            }
+
+            function renderOccupants() {
+              const container = document.getElementById("occupantList");
+              container.innerHTML = "";
+              occupants.forEach((o) => {
+                const div = document.createElement("div");
+                div.className = "occupant";
+                if (o.type === "visitor") div.style.background = "#fff3ea";
+                div.dataset.id = o.id;
+
+                div.innerHTML = `
+                  <div class="left">
+                    <div class="avatar" style="background:${
+                      o.avatarBg || ""
+                    }">${o.initials}</div>
+                    <div class="meta">
+                      <div class="name">${o.name} <span style="background:${
+                  o.type === "employee" ? "#16636a" : "#6aa07f"
+                }; color:#fff; border-radius:6px; padding:4px 6px; font-size:12px; margin-left:8px">${
+                  o.type === "employee" ? "Employee" : "Visitor"
+                }</span></div>
+                      <div class="muted">${o.meta}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div class="check">Check-in<br><span style="font-weight:700">${
+                      o.time
+                    }</span></div>
+                    <button class="btn-checkout" data-id="${
+                      o.id
+                    }" style="background:#fff;border:1px solid #e0b4ad;color:#b33b32;padding:8px 10px;border-radius:8px;cursor:pointer">Check Out</button>
+                  </div>
+                `;
+                container.appendChild(div);
+              });
+              updateKPIs();
+            }
+
+            function updateKPIs() {
+              const total = occupants.length;
+              const visitors = occupants.filter(
+                (o) => o.type === "visitor"
+              ).length;
+              const visitorsInside = visitors; // simple model: all visitors in list are inside
+              document.getElementById("totalInBuilding").textContent = total;
+              document.getElementById("visitorsToday").textContent = visitors;
+              document.getElementById("visitorsInsideMuted").textContent =
+                visitorsInside + " currently inside";
+              document.getElementById("occupantBadge").textContent =
+                total + " People";
+              document.getElementById("bannerCount").textContent = total;
+            }
+
+            function checkout(id) {
+              const idx = occupants.findIndex((o) => o.id === id);
+              if (idx === -1) return;
+              occupants.splice(idx, 1);
+              saveOccupants();
+              renderOccupants();
+            }
+
+            document.addEventListener("click", (e) => {
+              if (e.target.closest(".btn-checkout")) {
+                const id = e.target.dataset.id;
+                if (confirm("Check out this person?")) {
+                  checkout(id);
+                }
+              }
+            });
+
+            document
+              .getElementById("checkInBtn")
+              .addEventListener("click", () => {
+                const name = prompt("Visitor name (e.g. John Doe)");
+                if (!name) return;
+                const company = prompt("Company (optional)") || "";
+                const host = prompt("Visiting who? (optional)") || "";
+                const id = "o" + Date.now();
+                const initials = name
+                  .split(" ")
+                  .map((s) => s[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase();
+                const time = new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                const obj = {
+                  id,
+                  initials,
+                  name,
+                  type: "visitor",
+                  meta:
+                    (company ? company + " • " : "") +
+                    (host ? "Visiting " + host : ""),
+                  time,
+                };
+                occupants.push(obj);
+                saveOccupants();
+                renderOccupants();
+              });
+
+            // Emergency toggle
+            const emergencyBtn = document.getElementById("emergencyBtn");
+            const banner = document.getElementById("emergencyBanner");
+            emergencyBtn.addEventListener("click", () => {
+              if (banner.style.display === "none" || !banner.style.display) {
+                banner.style.display = "block";
+                emergencyBtn.textContent = "Deactivate Emergency";
+              } else {
+                banner.style.display = "none";
+                emergencyBtn.textContent = "Emergency Mode";
+              }
+            });
+
+            // init
+            loadOccupants();
+            document.addEventListener("DOMContentLoaded", renderOccupants);
+          </script>
+        </div>
+
+        <div class="footer-cards">
+          <div class="small">
+            <strong>Emergency Contacts</strong>
+            <div style="color: var(--muted); margin-top: 8px">
+              Emergency Services — 911<br />Building Security — +1-555-0911<br />Fire
+              Department — +1-555-0119
+            </div>
+          </div>
+          <div class="small">
+            <strong>Assembly Points</strong>
+            <div style="color: var(--muted); margin-top: 8px">
+              North Parking Lot (Primary)<br />South Garden (Secondary)<br />East
+              Plaza (Tertiary)
+            </div>
+          </div>
+          <div class="small">
+            <strong>Safety Status</strong>
+            <div style="color: var(--muted); margin-top: 8px">
+              Fire Alarms —
+              <span style="color: var(--success); font-weight: 700"
+                >Operational</span
+              ><br />Exit Routes — Clear<br />Last Drill — Oct 1, 2025
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
