@@ -9,6 +9,7 @@ from app import db
 from models import Office, Employee, Asset, Booking, Maintenance, User
 from schemas import OfficeSchema, EmployeeSchema, AssetSchema, BookingSchema, MaintenanceSchema, UserSchema
 from datetime import datetime
+from flask import Response
 
 api_bp = Blueprint('api', __name__)
 
@@ -233,67 +234,296 @@ def dashboard():
     return jsonify(data), 200
 
 
-# Simple AI endpoint for demo chat button. Intentionally unauthenticated so the
-# floating help/chat button works without login. Replace with a proper AI
-# integration (OpenAI, local LLM, etc.) when ready.
+# --- Lightweight demo endpoints for stock/order actions used by the frontend ---
+@api_bp.route('/stock/remove', methods=['POST'])
+def remove_stock_item():
+    # This is a demo/stub endpoint. In a real app you'd authenticate and
+    # remove the item from the DB. For the demo return success so the UI
+    # can remove the row.
+    payload = request.get_json() or {}
+    item = payload.get('item')
+    if not item:
+        return jsonify({'error': 'missing item'}), 400
+    # Log to server console for visibility during development
+    print(f"[demo] remove_stock_item called for: {item}")
+    return jsonify({'msg': 'removed', 'item': item}), 200
+
+
+_demo_orders = {}
+_demo_order_seq = 1
+
+
+@api_bp.route('/orders', methods=['POST'])
+def create_order():
+    # Demo create order — doesn't persist to DB beyond in-memory dict
+    global _demo_order_seq
+    payload = request.get_json() or {}
+    supplier = payload.get('supplier')
+    if not supplier:
+        return jsonify({'error': 'missing supplier'}), 400
+    order_id = _demo_order_seq
+    _demo_order_seq += 1
+    order = {
+        'id': order_id,
+        'supplier': supplier,
+        'status': 'pending',
+        'created_at': datetime.utcnow().isoformat()
+    }
+    _demo_orders[order_id] = order
+    print(f"[demo] created order: {order}")
+    return jsonify({'order_id': order_id, 'order': order}), 201
+
+
+@api_bp.route('/orders/<int:order_id>', methods=['DELETE'])
+def cancel_order(order_id):
+    # Demo cancel — remove from in-memory store
+    o = _demo_orders.get(order_id)
+    if not o:
+        return jsonify({'error': 'order not found'}), 404
+    # mark cancelled
+    o['status'] = 'cancelled'
+    print(f"[demo] cancelled order {order_id}")
+    # Optionally remove from store
+    _demo_orders.pop(order_id, None)
+    return jsonify({'msg': 'cancelled', 'order_id': order_id}), 200
+
+
+# Demo endpoint: list supported suppliers (for completeness)
+@api_bp.route('/suppliers', methods=['GET'])
+def list_suppliers():
+    suppliers = [
+        'Pick N Pay', 'Checkers', 'Shoprite', 'Woolworths', 'Spar', 'Makro'
+    ]
+    return jsonify({'suppliers': suppliers}), 200
+
+
+# Simulated external order endpoint: would contact merchant APIs in a real app
+@api_bp.route('/external_order', methods=['POST'])
+def external_order():
+    data = request.get_json() or {}
+    supplier = data.get('supplier')
+    items = data.get('items') or []
+    if not supplier or not items:
+        return jsonify({'error': 'missing supplier or items'}), 400
+    # Simulate different merchant behaviours — simple success/failure heuristics
+    # e.g. Make 'Makro' respond slowly or with partial success
+    global _demo_order_seq, _demo_orders
+    order_id = _demo_order_seq
+    _demo_order_seq += 1
+    status = 'accepted'
+    message = f'Order placed with {supplier}. Estimated fulfilment: 2-5 days.'
+    if supplier == 'Makro' and len(items) > 3:
+        status = 'partial'
+        message = f'{supplier} accepted part of the order. Check merchant portal for details.'
+    # store in demo orders
+    _demo_orders[order_id] = {'id': order_id, 'supplier': supplier, 'items': items, 'status': status}
+    print(f"[demo] external_order -> {supplier} items={len(items)} status={status}")
+    return jsonify({'order_id': order_id, 'status': status, 'message': message}), 201
+
+
+# AI assistant endpoint for office management questions
+# Uses Azure OpenAI to provide intelligent responses about the app
 @api_bp.route('/ai', methods=['POST'])
 def ai_reply():
+    """
+    AI Assistant endpoint using Azure OpenAI
+    Answers questions about the office management system with REAL data
+    """
+    try:
+        from ai import get_ai_response
+        from models import Employee, User, PresenceLog, PresenceStatus, StockItem, CoffeeOrder, TemperatureReading, TemperatureSensor
+        from sqlalchemy import desc, func
+        from datetime import datetime, timedelta
+        
+        # Get user message
+        payload = request.get_json() or {}
+        message = (payload.get('message') or '').strip()
+        
+        if not message:
+            return jsonify({
+                "reply": "👋 Hello! I'm your Office Management AI Assistant! Ask me about coffee, temperature, employees, stock, or any features."
+            }), 200
+        
+        # Gather REAL office data from database
+        context_data = {}
+        
+        try:
+            # PRESENCE DATA - Who's in the office?
+            employees_in = db.session.query(Employee, User).join(User).filter(Employee.status == 'active').all()
+            present_employees = []
+            total_checked_in = 0
+            
+            for emp, user in employees_in:
+                latest_log = PresenceLog.query.filter_by(user_id=user.id).order_by(desc(PresenceLog.created_at)).first()
+                if latest_log and latest_log.status == PresenceStatus.IN:
+                    present_employees.append({
+                        'name': emp.full_name,
+                        'department': emp.department,
+                        'time': latest_log.created_at.strftime('%I:%M %p')
+                    })
+                    total_checked_in += 1
+            
+            context_data['presence'] = {
+                'total_in_office': total_checked_in,
+                'total_employees': len(employees_in),
+                'employees_present': present_employees[:10]  # Limit to 10 for context
+            }
+            
+            # STOCK DATA - Low stock items
+            low_stock_items = StockItem.query.filter(
+                StockItem.quantity <= StockItem.reorder_point
+            ).limit(10).all()
+            
+            context_data['stock'] = {
+                'low_stock_count': len(low_stock_items),
+                'low_stock_items': [{
+                    'name': item.name,
+                    'quantity': item.quantity,
+                    'reorder_point': item.reorder_point,
+                    'unit': item.unit
+                } for item in low_stock_items]
+            }
+            
+            # COFFEE DATA - Recent orders and usage
+            today = datetime.now().date()
+            todays_orders = CoffeeOrder.query.filter(
+                func.date(CoffeeOrder.created_at) == today
+            ).count()
+            
+            recent_orders = CoffeeOrder.query.order_by(desc(CoffeeOrder.created_at)).limit(5).all()
+            
+            context_data['coffee'] = {
+                'orders_today': todays_orders,
+                'recent_orders': [{
+                    'user': order.user.name if order.user else 'Unknown',
+                    'type': order.coffee_type,
+                    'time': order.created_at.strftime('%I:%M %p')
+                } for order in recent_orders if order.user]
+            }
+            
+            # TEMPERATURE DATA - Latest readings
+            latest_readings = TemperatureReading.query.order_by(desc(TemperatureReading.created_at)).limit(5).all()
+            
+            if latest_readings:
+                context_data['temperature'] = {
+                    'latest_readings': [{
+                        'sensor': reading.sensor.name if reading.sensor else 'Unknown',
+                        'temperature': reading.temperature,
+                        'humidity': reading.humidity,
+                        'time': reading.created_at.strftime('%I:%M %p')
+                    } for reading in latest_readings if reading.sensor]
+                }
+            
+        except Exception as data_error:
+            print(f"Error gathering context data: {data_error}")
+            # Continue with whatever data we have
+        
+        # Get AI response with REAL data
+        ai_response = get_ai_response(message, context_data if context_data else None)
+        
+        return jsonify({"reply": ai_response}), 200
+        
+    except Exception as e:
+        print(f"AI Assistant Error: {e}")
+        import traceback
+        print(traceback.format_exc())
+        # Fallback response
+        return jsonify({
+            "reply": "🤖 I'm having trouble right now, but I'm here to help with your office management questions! Try asking about coffee, temperature, employees, or stock management."
+        }), 200
+
+
+# Streaming AI assistant endpoint (Server-Sent Events)
+@api_bp.route('/ai_stream', methods=['POST'])
+def ai_reply_stream():
+    """Stream AI assistant response as SSE for real-time typing effect."""
+    try:
+        from ai import stream_ai_response, get_ai_response
+        from models import Employee, User, PresenceLog, PresenceStatus, StockItem, CoffeeOrder, TemperatureReading, TemperatureSensor
+        from sqlalchemy import desc, func
+        from datetime import datetime
+    except Exception as e:  # noqa: BLE001
+        return jsonify({'error': f'Initialization failed: {e}'}), 500
+
     payload = request.get_json() or {}
     message = (payload.get('message') or '').strip()
     if not message:
-        return jsonify({"reply": "Hi — how can I help? Ask about coffee, temperature, stock, or presence."}), 200
-    # If an OpenAI key is present, call the API. Keep this optional so local
-    # development works without network or keys.
-    openai_key = os.getenv('OPENAI_API_KEY')
-    if openai_key:
-        try:
-            url = 'https://api.openai.com/v1/chat/completions'
-            body = {
-                'model': 'gpt-3.5-turbo',
-                'messages': [
-                    {'role': 'system', 'content': 'You are a helpful office assistant for an office management dashboard.'},
-                    {'role': 'user', 'content': message}
-                ],
-                'max_tokens': 200,
-                'temperature': 0.2,
+        return jsonify({'error': 'Empty message'}), 400
+
+    # Prepare context (reuse logic but simplified to avoid heavy duplication)
+    context_data = {}
+    try:
+        # Presence
+        employees_in = db.session.query(Employee, User).join(User).filter(Employee.status == 'active').all()
+        from sqlalchemy import desc as _desc, func as _func  # local aliasing
+        present_employees = []
+        total_checked_in = 0
+        for emp, user in employees_in:
+            latest_log = PresenceLog.query.filter_by(user_id=user.id).order_by(_desc(PresenceLog.created_at)).first()
+            if latest_log and latest_log.status == PresenceStatus.IN:
+                present_employees.append({
+                    'name': emp.full_name,
+                    'department': emp.department,
+                    'time': latest_log.created_at.strftime('%I:%M %p')
+                })
+                total_checked_in += 1
+        context_data['presence'] = {
+            'total_in_office': total_checked_in,
+            'total_employees': len(employees_in),
+            'employees_present': present_employees[:10]
+        }
+        # Stock
+        low_stock_items = StockItem.query.filter(StockItem.quantity <= StockItem.reorder_point).limit(10).all()
+        context_data['stock'] = {
+            'low_stock_count': len(low_stock_items),
+            'low_stock_items': [{
+                'name': i.name,
+                'quantity': i.quantity,
+                'reorder_point': i.reorder_point,
+                'unit': i.unit
+            } for i in low_stock_items]
+        }
+        # Coffee
+        today = datetime.now().date()
+        todays_orders = CoffeeOrder.query.filter(func.date(CoffeeOrder.created_at) == today).count()
+        recent_orders = CoffeeOrder.query.order_by(desc(CoffeeOrder.created_at)).limit(5).all()
+        context_data['coffee'] = {
+            'orders_today': todays_orders,
+            'recent_orders': [{
+                'user': o.user.name if o.user else 'Unknown',
+                'type': o.coffee_type,
+                'time': o.created_at.strftime('%I:%M %p')
+            } for o in recent_orders if o.user]
+        }
+        # Temperature
+        latest_readings = TemperatureReading.query.order_by(desc(TemperatureReading.created_at)).limit(3).all()
+        if latest_readings:
+            context_data['temperature'] = {
+                'latest_readings': [{
+                    'sensor': r.sensor.name if r.sensor else 'Unknown',
+                    'temperature': r.temperature,
+                    'humidity': r.humidity,
+                    'time': r.created_at.strftime('%I:%M %p')
+                } for r in latest_readings if r.sensor]
             }
-            req = urllib.request.Request(url, data=json.dumps(body).encode('utf-8'),
-                                         headers={
-                                             'Content-Type': 'application/json',
-                                             'Authorization': f'Bearer {openai_key}'
-                                         })
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                res = json.load(resp)
-                reply = None
-                if isinstance(res, dict):
-                    choices = res.get('choices') or []
-                    if choices:
-                        msg = choices[0].get('message') or {}
-                        reply = msg.get('content')
-                if reply:
-                    return jsonify({'reply': reply.strip()}), 200
-        except urllib.error.HTTPError as he:
-            # fall through to canned reply on API error
-            try:
-                err = he.read().decode('utf-8')
-            except Exception:
-                err = str(he)
-            # keep a concise fallback
-        except Exception:
-            # network error or timeout — fall back to canned replies
-            pass
+    except Exception as e:  # noqa: BLE001
+        print(f"Context build error (stream): {e}")
 
-    # Fallback canned replies (works offline or when OpenAI not configured)
-    lm = message.lower()
-    if 'coffee' in lm:
-        reply = "Coffee machine beans are low (approx 12%). Water level is 68% and milk 45%. Would you like me to create a restock order?"
-    elif 'temperature' in lm or 'temp' in lm:
-        reply = "The current office temperature is 22°C. I can set a new target if you tell me the desired temperature."
-    elif 'presence' in lm or 'who' in lm or 'in office' in lm:
-        reply = "Currently 24 people are in the office and 3 are out. I can show the list or export attendance."
-    elif 'stock' in lm or 'low' in lm or 'order' in lm:
-        reply = "Low stock items: Coffee Beans, Paper. I can prepare a purchase order for these items."
-    else:
-        reply = "I can help with coffee, temperature, stock, and presence. Try asking something like: 'How much coffee is left?'"
+    def event_stream():  # inner generator
+        try:
+            for chunk in stream_ai_response(message, context_data if context_data else None):
+                # Send each chunk as SSE data line
+                yield f"data: {json.dumps({'delta': chunk})}\n\n"
+            # Signal completion
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception as e:  # noqa: BLE001
+            err_msg = f"Streaming error: {e}"
+            yield f"data: {json.dumps({'error': err_msg, 'done': True})}\n\n"
 
-    return jsonify({"reply": reply}), 200
+    headers = {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no'
+    }
+    return Response(event_stream(), headers=headers)
