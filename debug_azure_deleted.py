@@ -1,0 +1,1 @@
+"""Legacy Azure debug helper removed in favor of the Node.js /chat service."""

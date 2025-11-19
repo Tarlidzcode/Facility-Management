@@ -1,0 +1,6 @@
+AZURE_CONFIG_SUMMARY.txt - DELETED
+
+This file contained Azure OpenAI configuration information that has been removed.
+OpenAI functionality has been completely removed from the project.
+
+The office management system now uses only fallback responses for the chat feature.
