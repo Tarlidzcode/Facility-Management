@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import requests
 
 # API Key for OpenWeatherMap
-OPENWEATHER_API_KEY = "85bde7ccda148ed2224ad0ba579bf491"
+OPENWEATHER_API_KEY = "###################################"
 
 def fetch_current_weather(city="Cape Town, Pinelands, ZA"):
     """Fetch current weather data from OpenWeatherMap.
@@ -142,3 +142,4 @@ def fetch_hourly_weather(lat, lon, hours=24):
     except Exception as e:
         print(f"OpenWeatherMap fetch error: {e}")
         return None
+
