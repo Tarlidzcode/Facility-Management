@@ -1,0 +1,4 @@
+/* Legacy entry for stock.css — import the page-scoped CSS to avoid duplication */
+@import url('/static/css/pages/stock.css');
+
+/* If you need backward compatibility adjustments, add them below */

@@ -1,0 +1,1239 @@
+/* presence.css - Enhanced with MRI Corporate Colors */
+/* MRI Primary Color: #16636a (teal) */
+/* Complementary colors for variety */
+
+:root {
+    --mri-primary: #16636a;
+    --mri-primary-light: #1e8491;
+    --mri-primary-dark: #0f4a4f;
+    --mri-accent: #6aa07f;
+    --mri-success: #198754;
+    --mri-danger: #dc3545;
+    --mri-warning: #ffc107;
+    --mri-gray: #6c757d;
+    --mri-light-bg: #f6fbfb;
+}
+
+/* Header Styles */
+.presence-header {
+    background: linear-gradient(135deg, var(--mri-primary) 0%, var(--mri-primary-light) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(22, 99, 106, 0.15);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.presence-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.presence-header .lead {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.95;
+    font-size: 1rem;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(22, 99, 106, 0.1);
+    border-top-color: var(--mri-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Card Styles */
+.presence-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.5s ease;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--mri-light-bg);
+}
+
+.card-header h3 {
+    margin: 0;
+    color: var(--mri-primary);
+    font-size: 1.4rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Search Box */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box svg {
+    position: absolute;
+    left: 12px;
+    color: var(--mri-gray);
+}
+
+.search-box input {
+    padding: 8px 12px 8px 36px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--mri-primary);
+    box-shadow: 0 0 0 3px rgba(22, 99, 106, 0.1);
+}
+
+/* Presence Grid */
+.presence-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.presence-tile {
+    background: white;
+    border: 2px solid var(--mri-light-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.5s ease;
+}
+
+.presence-tile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--mri-primary), var(--mri-accent));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.presence-tile:hover::before {
+    transform: scaleX(1);
+}
+
+.presence-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(22, 99, 106, 0.15);
+    border-color: var(--mri-primary);
+}
+
+.presence-tile.pulse {
+    animation: pulse 0.6s ease;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Presence Avatar */
+.presence-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--mri-light-bg);
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--mri-primary);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.presence-avatar.online {
+    background: linear-gradient(135deg, var(--mri-primary) 0%, var(--mri-primary-light) 100%);
+    color: white;
+}
+
+.presence-avatar.offline {
+    background: #e9ecef;
+    color: var(--mri-gray);
+}
+
+/* Presence Dot */
+.presence-dot {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.presence-dot.online {
+    background: var(--mri-success);
+    animation: pulse-dot 2s infinite;
+}
+
+.presence-dot.offline {
+    background: var(--mri-gray);
+}
+
+@keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+    50% { box-shadow: 0 2px 6px rgba(25, 135, 84, 0.6), 0 0 0 6px rgba(25, 135, 84, 0.2); }
+}
+
+/* Presence Info */
+.presence-info {
+    margin-bottom: 1rem;
+}
+
+.presence-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.presence-dept {
+    color: var(--mri-gray);
+    font-size: 0.875rem;
+}
+
+/* Status Badge */
+.presence-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.presence-status-badge.online {
+    background: rgba(25, 135, 84, 0.1);
+    color: var(--mri-success);
+}
+
+.presence-status-badge.offline {
+    background: rgba(108, 117, 125, 0.1);
+    color: var(--mri-gray);
+}
+
+/* Presence Actions */
+.presence-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Button Styles */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 50%;
+}
+
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-icon.spinning svg {
+    animation: spin 1s linear;
+}
+
+.btn-primary {
+    background: var(--mri-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--mri-primary-dark);
+}
+
+.btn-cancel {
+    background: #e9ecef;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #d3d6d9;
+}
+
+.status-pill { 
+    font-size: 13px; 
+}
+
+.activity-list li { 
+    background: #fff; 
+}
+
+/* Safety Section Styles */
+.presence-safety {
+    margin-top: 2rem;
+}
+
+.presence-safety .top { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 1.5rem;
+}
+
+.presence-safety .top h3 {
+    margin: 0;
+    color: var(--mri-primary);
+}
+
+.presence-safety .top .muted {
+    color: var(--mri-gray);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.presence-safety .safety-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.presence-safety .cards { 
+    display: flex; 
+    gap: 1rem; 
+    margin-top: 1rem; 
+}
+
+.presence-safety .card.small { 
+    flex: 1;
+    padding: 1.5rem; 
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease;
+}
+
+.presence-safety .card.small:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(22, 99, 106, 0.15);
+}
+
+.presence-safety .card.small .label {
+    color: var(--mri-gray);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.presence-safety .card.small .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--mri-primary);
+    margin: 0.5rem 0;
+}
+
+.presence-safety .banner { 
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--mri-danger) 0%, #bb2d3b 100%);
+    color: #fff;
+    border-radius: 12px;
+    display: none;
+    animation: slideDown 0.3s ease;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.presence-safety .banner.slide-down {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.presence-safety .banner strong {
+    display: block;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.presence-safety .panel { 
+    margin-top: 1.5rem; 
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.presence-safety .panel h3 {
+    margin: 0 0 1.5rem 0;
+    color: var(--mri-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.presence-safety .status-badge { 
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: var(--mri-primary);
+    color: #fff;
+}
+
+.presence-safety .occupant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.presence-safety .occupant { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 1rem 1.25rem;
+    border-radius: 12px; 
+    background: var(--mri-light-bg); 
+    transition: all 0.3s ease;
+    animation: slideUp 0.5s ease;
+}
+
+.presence-safety .occupant:hover {
+    background: #e8f4f5;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(22, 99, 106, 0.1);
+}
+
+.presence-safety .occupant.visitor-occupant {
+    background: #fff3ea;
+}
+
+.presence-safety .occupant.visitor-occupant:hover {
+    background: #ffe8d6;
+}
+
+.presence-safety .left { 
+    display: flex; 
+    gap: 1rem; 
+    align-items: center; 
+}
+
+.presence-safety .avatar { 
+    width: 56px; 
+    height: 56px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 700;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.presence-safety .avatar-employee {
+    background: linear-gradient(135deg, var(--mri-primary) 0%, var(--mri-primary-light) 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(22, 99, 106, 0.2);
+}
+
+.presence-safety .avatar-visitor {
+    background: linear-gradient(135deg, var(--mri-accent) 0%, #7fb594 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(106, 160, 127, 0.2);
+}
+
+.presence-safety .meta .name { 
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.presence-safety .muted { 
+    color: var(--mri-gray); 
+    font-size: 0.875rem; 
+}
+
+.presence-safety .user-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+.presence-safety .employee-badge {
+    background: rgba(22, 99, 106, 0.1);
+    color: var(--mri-primary);
+}
+
+.presence-safety .visitor-badge {
+    background: rgba(106, 160, 127, 0.1);
+    color: var(--mri-accent);
+}
+
+.presence-safety .actions-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.presence-safety .check {
+    text-align: right;
+}
+
+.presence-safety .check-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--mri-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.presence-safety .time {
+    font-weight: 600;
+    color: var(--mri-primary);
+    font-size: 1rem;
+}
+
+.presence-safety .btn-checkout { 
+    background: #fff; 
+    border: 2px solid var(--mri-danger); 
+    color: var(--mri-danger); 
+    padding: 8px 16px; 
+    border-radius: 8px; 
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.presence-safety .btn-checkout:hover {
+    background: var(--mri-danger);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.presence-safety .btn-danger {
+    background: var(--mri-danger);
+    border: none;
+    color: #fff;
+}
+
+.presence-safety .btn-danger:hover {
+    background: #bb2d3b;
+}
+
+.presence-safety .btn-danger.active {
+    background: #a02834;
+    animation: pulse 1s infinite;
+}
+
+.presence-safety .checkin-btn {
+    background: var(--mri-success);
+    color: #fff;
+    border: none;
+}
+
+.presence-safety .checkin-btn:hover {
+    background: #157347;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--mri-gray);
+}
+
+.empty-state svg {
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--mri-light-bg);
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--mri-primary);
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--mri-gray);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: var(--mri-light-bg);
+    color: var(--mri-primary);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--mri-primary);
+    box-shadow: 0 0 0 3px rgba(22, 99, 106, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 2rem;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-success {
+    background: var(--mri-success);
+}
+
+.toast-error {
+    background: var(--mri-danger);
+}
+
+.toast-info {
+    background: var(--mri-primary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) { 
+    .presence-safety .cards { 
+        flex-direction: column; 
+    }
+    
+    .presence-safety .top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .presence-safety .safety-controls {
+        flex-direction: column;
+    }
+    
+    .presence-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    
+    .search-box input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .presence-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .presence-safety .occupant {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .presence-safety .left {
+        flex-direction: column;
+    }
+    
+    .presence-safety .actions-row {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .presence-safety .btn-checkout {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Show More Tile for Presence Grid */
+.show-more-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(22, 99, 106, 0.05) 0%, rgba(22, 99, 106, 0.1) 100%);
+    border: 2px dashed var(--mri-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.show-more-tile:hover {
+    background: linear-gradient(135deg, rgba(22, 99, 106, 0.1) 0%, rgba(22, 99, 106, 0.15) 100%);
+    border-color: var(--mri-primary-light);
+    transform: translateY(-2px);
+}
+
+.show-more-btn {
+    background: none;
+    border: none;
+    color: var(--mri-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.show-more-btn:hover {
+    color: var(--mri-primary-light);
+    transform: scale(1.05);
+}
+
+.show-more-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.show-more-btn:hover svg {
+    transform: scale(1.2);
+}
+
+/* Occupants Section Styling */
+.occupants-sections-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.occupants-section {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.occupants-section:hover {
+    box-shadow: 0 4px 16px rgba(22, 99, 106, 0.15);
+}
+
+/* Section Header (Clickable Button) */
+.section-header {
+    width: 100%;
+    background: linear-gradient(135deg, var(--mri-primary) 0%, var(--mri-primary-light) 100%);
+    color: white;
+    border: none;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.section-header:hover {
+    background: linear-gradient(135deg, var(--mri-primary-light) 0%, var(--mri-primary) 100%);
+}
+
+.section-header.visitor-header {
+    background: linear-gradient(135deg, var(--mri-accent) 0%, #7db591 100%);
+}
+
+.section-header.visitor-header:hover {
+    background: linear-gradient(135deg, #7db591 0%, var(--mri-accent) 100%);
+}
+
+.section-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.section-header:hover .section-icon {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.section-header-info {
+    flex: 1;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: white;
+}
+
+.section-count {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.section-chevron {
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.section-header.expanded .section-chevron {
+    transform: rotate(180deg);
+}
+
+/* Occupants List (Collapsible Content) */
+.occupants-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    max-height: 600px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.occupants-list.collapsed {
+    max-height: 0;
+    padding: 0 1rem;
+    overflow: hidden;
+}
+
+/* Show More Button for Lists */
+.show-more-list-btn {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, rgba(22, 99, 106, 0.05) 0%, rgba(22, 99, 106, 0.1) 100%);
+    border: 2px solid var(--mri-primary);
+    border-radius: 8px;
+    color: var(--mri-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.show-more-list-btn:hover {
+    background: linear-gradient(135deg, rgba(22, 99, 106, 0.1) 0%, rgba(22, 99, 106, 0.15) 100%);
+    border-color: var(--mri-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 99, 106, 0.2);
+}
+
+.show-more-list-btn:active {
+    transform: translateY(0);
+}
+
+.show-more-list-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.show-more-list-btn:hover svg {
+    transform: translateY(2px);
+}
+
+/* Responsive Design for Sections */
+@media (max-width: 900px) {
+    .occupants-sections-container {
+        grid-template-columns: 1fr;
+    }
+}
+/* Emergency Information Section */
+.emergency-info-section {
+    margin-top: 1.5rem;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.4s ease;
+}
+
+.emergency-info-section.emergency-info-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.emergency-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.emergency-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.emergency-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-color: var(--mri-primary);
+    transform: translateY(-2px);
+}
+
+.emergency-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.emergency-icon {
+    color: var(--mri-primary);
+    flex-shrink: 0;
+}
+
+.emergency-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--mri-primary);
+}
+
+.emergency-contacts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contact-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.contact-item:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+}
+
+.contact-label {
+    font-size: 0.95rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.contact-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mri-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.assembly-points-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.assembly-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.assembly-item:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+}
+
+.check-icon {
+    color: #6aa07f;
+    flex-shrink: 0;
+}
+
+.assembly-item span {
+    font-size: 0.95rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.safety-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.status-label {
+    font-size: 0.95rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.status-badge.operational {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.clear {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-value {
+    font-size: 0.95rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .emergency-grid {
+        grid-template-columns: 1fr;
+    }
+}

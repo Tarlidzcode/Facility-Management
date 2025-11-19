@@ -1,0 +1,211 @@
+/* safety_dashboard.css */
+.presence-safety {
+    margin-top: 20px;
+}
+
+.presence-safety .cards {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.presence-safety .card.small {
+    flex: 1;
+    min-width: 140px;
+    padding: 16px;
+}
+
+.presence-safety .card.small .label {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.presence-safety .card.small .value {
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.presence-safety .banner {
+    margin-top: 16px;
+    padding: 16px;
+    background: #dc3545;
+    color: white;
+    border-radius: 8px;
+    display: none;
+}
+
+.presence-safety .banner strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.presence-safety .occupant-list {
+    margin-top: 16px;
+}
+
+.presence-safety .occupant {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #f6fbfb;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.presence-safety .occupant.visitor {
+    background: #fff3ea;
+}
+
+.presence-safety .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.presence-safety .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+.presence-safety .employee-avatar {
+    background: #16636a;
+}
+
+.presence-safety .visitor-avatar {
+    background: #6aa07f;
+}
+
+.presence-safety .meta .name {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.presence-safety .meta .muted {
+    font-size: 13px;
+    color: #666;
+}
+
+.presence-safety .check {
+    text-align: right;
+    font-size: 13px;
+    color: #666;
+}
+
+.presence-safety .user-badge {
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 12px;
+    margin-left: 8px;
+    color: white;
+}
+
+.presence-safety .employee-badge {
+    background: #16636a;
+}
+
+.presence-safety .visitor-badge {
+    background: #6aa07f;
+}
+
+.presence-safety .actions-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.presence-safety .time {
+    font-weight: 700;
+    color: #333;
+}
+
+.presence-safety .check span {
+    font-weight: 600;
+    color: #333;
+}
+
+.presence-safety .btn-checkout {
+    background: white;
+    border: 1px solid #e0b4ad;
+    color: #b33b32;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.presence-safety .btn-checkout:hover {
+    background: #fff3f2;
+}
+
+.presence-safety .checkin-btn {
+    background: #198754;
+    color: white;
+    border: none;
+}
+
+.presence-safety .checkin-btn:hover {
+    background: #157347;
+}
+
+.presence-safety .btn-danger {
+    background: #dc3545;
+    border: none;
+    color: white;
+}
+
+.presence-safety .btn-danger:hover {
+    background: #bb2d3b;
+}
+
+.presence-safety .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.presence-safety .top .safety-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.presence-safety .status-badge {
+    background: #16636a;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+@media (max-width: 768px) {
+    .presence-safety .cards {
+        flex-direction: column;
+    }
+    
+    .presence-safety .top {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .presence-safety .top .safety-controls {
+        flex-direction: column;
+    }
+    
+    .presence-safety .occupant {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .presence-safety .check {
+        text-align: left;
+    }
+}

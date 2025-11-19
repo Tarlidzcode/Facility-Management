@@ -1,0 +1,91 @@
+/* MRI Color Palette (derived from existing styles) */
+:root {
+  --mri-bg: #022f3c;
+  --mri-primary: #0a5664;
+  --mri-accent: #17a2b8;
+  --mri-accent-light: #4dc6d6;
+  --mri-danger: #dc3545;
+  --mri-text: #f5f9fa;
+  --mri-card-bg: #ffffff;
+  --mri-shadow: 0 8px 32px rgba(2, 47, 60, 0.35);
+}
+
+* { box-sizing: border-box; }
+body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; }
+
+body {
+  background: var(--mri-bg) url('/static/img/mri_logo.svg') center/35% no-repeat fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mri-text);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle dark overlay */
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(2,47,60,0.85) 0%, rgba(2,47,60,0.65) 100%);
+  backdrop-filter: blur(2px);
+}
+
+.login-wrapper { position: relative; width: 100%; max-width: 420px; padding: 1.5rem; }
+
+.login-card {
+  background: var(--mri-card-bg);
+  color: #0a2d35;
+  border-radius: 22px;
+  padding: 2.5rem 2.25rem 2rem;
+  box-shadow: var(--mri-shadow);
+  position: relative;
+  overflow: hidden;
+  animation: floatIn .6s ease;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -30%;
+  width: 75%;
+  height: 160%;
+  background: radial-gradient(circle at center, var(--mri-accent-light) 0%, transparent 70%);
+  opacity: .25;
+  transform: rotate(25deg);
+}
+
+.brand { text-align: center; margin-bottom: 1.75rem; }
+.brand h1 { margin: .75rem 0 .35rem; font-size: 1.75rem; font-weight: 700; letter-spacing: .5px; color: var(--mri-primary); }
+.subtitle { margin: 0; font-size: .9rem; color: #0c4e5b; }
+
+.logo-circle { width: 82px; height: 82px; border-radius: 20px; margin: 0 auto; background: var(--mri-primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 18px rgba(23,162,184,0.35); }
+.logo-circle img { width: 60px; height: 60px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
+
+.alert { background: var(--mri-danger); color: #fff; padding: .75rem 1rem; border-radius: 10px; font-size: .85rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(220,53,69,.35); }
+
+.login-form { display: flex; flex-direction: column; gap: 1.1rem; }
+.form-group { display: flex; flex-direction: column; gap: .4rem; }
+.form-group label { font-size: .8rem; font-weight: 600; letter-spacing: .75px; text-transform: uppercase; color: #083a45; display: flex; gap: .5rem; align-items: center; }
+.form-group input { border: 2px solid #b8e6eb; border-radius: 12px; padding: .9rem .95rem; font-size: .95rem; font-weight: 500; background: #f9feff; outline: none; transition: border-color .25s, box-shadow .25s; }
+.form-group input:focus { border-color: var(--mri-accent); box-shadow: 0 0 0 3px rgba(23,162,184,.25); }
+
+.btn-primary { background: var(--mri-accent); border: none; padding: .95rem 1.25rem; border-radius: 14px; font-size: .95rem; font-weight: 600; letter-spacing: .5px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .6rem; box-shadow: 0 4px 18px rgba(23,162,184,.4); transition: background .25s, transform .25s; }
+.btn-primary:hover { background: var(--mri-primary); transform: translateY(-2px); }
+.btn-primary:active { transform: translateY(0); }
+
+.footer-hint { text-align: center; margin-top: 1.5rem; font-size: .75rem; color: #0d4d5b; }
+.footer-hint a { color: var(--mri-accent); text-decoration: none; font-weight: 600; }
+.footer-hint a:hover { text-decoration: underline; }
+
+@keyframes floatIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Responsive */
+@media (max-width: 520px) {
+  .login-card { padding: 2rem 1.5rem 1.5rem; }
+  .logo-circle { width: 72px; height: 72px; }
+  .logo-circle img { width: 52px; height: 52px; }
+}

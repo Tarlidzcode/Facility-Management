@@ -1,0 +1,32 @@
+<div class="order-panel" style="padding:18px;border-radius:8px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.06);">
+  <h4 style="margin-top:0;color:#1f2d3d;">Create Purchase Order</h4>
+  <p class="muted" style="margin-bottom:12px;">Select supplier, add items and quantities then place the order with one of our supported merchants.</p>
+
+  <div class="form-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+    <label style="min-width:92px;color:#3b4a57;">Supplier</label>
+    <select id="orderSupplier" class="form-control" style="flex:1;padding:8px;border:1px solid #e6eef6;border-radius:4px;">
+      <option value="">Select a supplier</option>
+      <option>Pick N Pay</option>
+      <option>Checkers</option>
+      <option>Shoprite</option>
+      <option>Woolworths</option>
+      <option>Spar</option>
+      <option>Makro</option>
+    </select>
+  </div>
+
+  <div id="orderItems" style="margin-bottom:8px;">
+    <div class="order-item-row" style="display:flex;gap:8px;margin-bottom:6px;">
+      <input class="form-control item-name" placeholder="Item name" style="flex:2;padding:8px;border:1px solid #e6eef6;border-radius:4px;">
+      <input class="form-control item-qty" type="number" min="1" value="1" style="width:80px;padding:8px;border:1px solid #e6eef6;border-radius:4px;">
+      <button class="btn btn-danger remove-item-row" type="button" style="background:#ff5a5f;border:none;padding:6px 10px;border-radius:4px;color:#fff;">Remove</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:8px;">
+    <button id="addOrderItem" class="btn" style="background:#f0f6fa;border:1px solid #e1eef7;padding:8px 12px;border-radius:6px;color:#1f2d3d;">+ Add item</button>
+    <div>
+      <button id="submitExternalOrder" class="btn btn-primary" style="background:#2b6cb0;border:none;padding:8px 14px;border-radius:6px;color:#fff;">Place Order</button>
+    </div>
+  </div>
+</div>
