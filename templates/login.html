@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Office Portal</title>
+  <link rel="stylesheet" href="/static/css/login.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="brand">
+        <div class="logo-circle">
+          <img src="/static/img/mri_logo.svg" alt="Logo" />
+        </div>
+        <h1>Office Portal</h1>
+        <p class="subtitle">Secure access to presence, safety & resources</p>
+      </div>
+      {% if error %}
+      <div class="alert">{{ error }}</div>
+      {% endif %}
+      <form method="POST" class="login-form">
+        <div class="form-group">
+          <label for="email"><i class="fa fa-envelope"></i> Email</label>
+          <input type="email" id="email" name="email" placeholder="you@company.com" required />
+        </div>
+        <div class="form-group">
+          <label for="password"><i class="fa fa-lock"></i> Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="fa fa-sign-in-alt"></i> Sign In
+        </button>
+      </form>
+      <div class="footer-hint">
+        <small>Need access? Contact an administrator.</small>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

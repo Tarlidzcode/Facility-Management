@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Overview - Office Manager{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/pages/dashboard.css" />
+{% endblock %}
+
+{% block header %}
+<header class="main-header">
+  <h1>Dashboard Overview</h1>
+  <p class="lead">Real-time office monitoring and analytics</p>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="caution-section">
+  <div class="caution-header">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>Caution</span>
+  </div>
+  <div class="caution-items">
+    <div class="caution-item">
+      <i class="fa-solid fa-mug-hot"></i>
+      <span>Coffee beans running low (12% remaining)</span>
+    </div>
+    <div class="caution-item">
+      <i class="fa-solid fa-boxes-stacked"></i>
+      <span>Stock needs replenishment</span>
+    </div>
+    <div class="caution-item">
+      <i class="fa-solid fa-users"></i>
+      <span>Office attendance is above average today</span>
+    </div>
+  </div>
+</section>
+
+<section class="cards">
+  <div class="card metric low-stock-card" data-navigate="stock">
+    <div class="card-title">Low Stock Items</div>
+    <div class="metric-value"><span id="low_stock">3</span></div>
+    <div class="metric-note">Needs attention</div>
+    <div class="low-stock-overlay">
+      <div class="low-stock-header">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span>Low Stock Items</span>
+      </div>
+      <ul class="low-stock-list">
+        <li>
+          <i class="fa-solid fa-mug-hot"></i>
+          <span>Coffee Beans - 12% remaining</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-droplet"></i>
+          <span>Milk - 15% remaining</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-cookie"></i>
+          <span>Sugar - 18% remaining</span>
+        </li>
+      </ul>
+      <div class="low-stock-footer">
+        <i class="fa-solid fa-arrow-right"></i>
+        <span>Click to manage stock</span>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="grid">
+  <div class="card chart-card" data-chart="coffee">
+    <div class="chart-header">
+      <div class="chart-icon coffee-icon">
+        <i class="fa-solid fa-mug-hot"></i>
+      </div>
+      <div class="chart-title-wrapper">
+        <h3>Coffee Consumption Today</h3>
+        <p class="chart-subtitle">Hourly breakdown</p>
+      </div>
+    </div>
+    <canvas id="coffeeChart"></canvas>
+    <div class="chart-overlay">
+      <i class="fa-solid fa-chart-bar"></i>
+      <span>View Details</span>
+    </div>
+  </div>
+  <div class="card chart-card" data-chart="temperature">
+    <div class="chart-header">
+      <div class="chart-icon temp-icon">
+        <i class="fa-solid fa-thermometer-half"></i>
+      </div>
+      <div class="chart-title-wrapper">
+        <h3>Temperature Monitoring</h3>
+        <p class="chart-subtitle">Real-time tracking</p>
+      </div>
+    </div>
+    <canvas id="tempChart"></canvas>
+    <div class="chart-overlay">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>View Details</span>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Ensure Chart.js is loaded
+console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+
+// Initialize charts immediately with demo data
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, initializing charts...');
+  
+  const coffeeCanvas = document.getElementById('coffeeChart');
+  const tempCanvas = document.getElementById('tempChart');
+  
+  console.log('Coffee canvas:', coffeeCanvas);
+  console.log('Temp canvas:', tempCanvas);
+  
+  if (coffeeCanvas && typeof Chart !== 'undefined') {
+    const coffeeCtx = coffeeCanvas.getContext('2d');
+    new Chart(coffeeCtx, {
+      type: 'bar',
+      data: {
+        labels: ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm'],
+        datasets: [{
+          label: 'Cups',
+          data: [3, 12, 18, 9, 6, 5, 10, 8],
+          backgroundColor: '#356b98'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+    console.log('Coffee chart created');
+  }
+  
+  if (tempCanvas && typeof Chart !== 'undefined') {
+    const tempCtx = tempCanvas.getContext('2d');
+    new Chart(tempCtx, {
+      type: 'line',
+      data: {
+        labels: ['6am', '9am', '12pm', '3pm', '6pm'],
+        datasets: [{
+          label: 'Temperature (°C)',
+          data: [21.5, 22.0, 22.3, 22.5, 21.9],
+          borderColor: '#2c9f6a',
+          backgroundColor: 'rgba(44,159,106,0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { 
+            beginAtZero: false,
+            min: 20,
+            max: 24
+          }
+        }
+      }
+    });
+    console.log('Temperature chart created');
+  }
+  
+  // Add click navigation to chart cards
+  const chartCards = document.querySelectorAll('.chart-card');
+  chartCards.forEach(card => {
+    card.addEventListener('click', function() {
+      const chartType = this.getAttribute('data-chart');
+      console.log('Chart card clicked:', chartType);
+      
+      if (chartType === 'coffee') {
+        window.location.href = '/coffee';
+      } else if (chartType === 'temperature') {
+        window.location.href = '/temperature';
+      }
+    });
+    
+    // Add pointer cursor style
+    card.style.cursor = 'pointer';
+  });
+  
+  // Add click navigation to low stock card
+  const lowStockCard = document.querySelector('.low-stock-card');
+  if (lowStockCard) {
+    lowStockCard.addEventListener('click', function() {
+      console.log('Low stock card clicked');
+      window.location.href = '/stock';
+    });
+    
+    lowStockCard.style.cursor = 'pointer';
+  }
+});
+</script>
+<script src="/static/js/app.js"></script>
+{% endblock %}

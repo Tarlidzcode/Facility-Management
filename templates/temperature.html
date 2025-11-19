@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Temperature — Office Manager{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/pages/temperature.css" />
+{% endblock %}
+
+{% block header %}
+<header class="main-header">
+  <h1>Temperature Control</h1>
+  <p class="lead">Monitor and control office climate</p>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="cards">
+  <div class="card metric">
+    <div class="card-title">Current Temperature</div>
+    <div class="metric-value">22°C</div>
+    <div class="card-icon">
+      <i class="fa-solid fa-thermometer-half"></i>
+    </div>
+  </div>
+  <div class="card metric">
+    <div class="card-title">Humidity</div>
+    <div class="metric-value">45%</div>
+    <div class="card-icon"><i class="fa-solid fa-droplet"></i></div>
+  </div>
+  <div class="card metric">
+    <div class="card-title">Air Quality</div>
+    <div class="metric-value">Good</div>
+    <div class="card-icon"><i class="fa-solid fa-wind"></i></div>
+  </div>
+  <div class="card metric">
+    <div class="card-title">Energy Usage</div>
+    <div class="metric-value">2.4 kW</div>
+    <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+  </div>
+</div>
+
+<div class="card settings-card">
+  <h3>Temperature Settings</h3>
+  <div class="settings-grid">
+    <div class="settings-left">
+      <div class="setting row">
+        <div class="setting-label">Auto Mode</div>
+        <label class="switch">
+          <input type="checkbox" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="muted">
+        Automatically adjusts temperature based on occupancy and time of day
+      </div>
+
+      <div class="setting target">
+        <div class="setting-label">
+          Target Temperature: <strong id="targetDisplay">22°C</strong>
+        </div>
+        <div class="range-wrap">
+          <input
+            id="targetRange"
+            type="range"
+            min="18"
+            max="26"
+            value="22"
+          />
+          <div class="range-labels">
+            <span>18°C</span><span>26°C</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="applySettings" class="btn-apply">Apply Settings</button>
+    </div>
+    <div class="settings-right">
+      <div class="system-status">
+        <h4>System Status</h4>
+        <div class="status-row">
+          <div>Mode</div>
+          <div class="muted">Auto</div>
+        </div>
+        <div class="status-row">
+          <div>HVAC Status</div>
+          <div class="status-ok">Running</div>
+        </div>
+        <div class="status-row">
+          <div>Fan Speed</div>
+          <div class="muted">Medium</div>
+        </div>
+        <div class="status-row">
+          <div>Filter Status</div>
+          <div class="status-ok">Clean (87%)</div>
+        </div>
+        <div class="status-row">
+          <div>Next Maintenance</div>
+          <div class="muted">In 42 days</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const targetRange = document.getElementById('targetRange');
+  const targetDisplay = document.getElementById('targetDisplay');
+  
+  targetRange.addEventListener('input', function() {
+    targetDisplay.textContent = this.value + '°C';
+  });
+});
+</script>
+{% endblock %}

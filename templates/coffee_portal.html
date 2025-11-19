@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Machine Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            --primary-dark: #654321;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f5f0;
+            --card-bg: #ffffff;
+            --text-primary: #333333;
+            --text-muted: #6c757d;
+            --border-color: #e0d4c3;
+            --shadow: 0 2px 10px rgba(139,69,19,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .metric-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: var(--primary-color);
+            opacity: 0.7;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .metric-unit {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .machine-status {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            background: #fafafa;
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-percentage {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.success { background: var(--success-color); }
+        .progress-fill.warning { background: var(--warning-color); }
+        .progress-fill.danger { background: var(--danger-color); }
+
+        .status-message {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .status-message.warning { color: #856404; }
+        .status-message.success { color: #155724; }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .action-btn.success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .action-btn.warning {
+            background: var(--warning-color);
+            color: #333;
+        }
+
+        .refill-controls {
+            margin-top: 20px;
+        }
+
+        .refill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .refill-item:last-child {
+            border-bottom: none;
+        }
+
+        .refill-btn {
+            padding: 6px 12px;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .recent-activity {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin-bottom: 10px;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-time {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .activity-type {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .refresh-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.success { background: var(--success-color); }
+        .notification.error { background: var(--danger-color); }
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-mug-hot"></i> Coffee Machine Portal</h1>
+            <p>Monitor coffee consumption and machine status</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-mug-hot"></i>
+                </div>
+                <div class="metric-title">Coffee Today</div>
+                <div class="metric-value" id="coffee-today">--</div>
+                <div class="metric-unit">cups</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-title">Peak Hour</div>
+                <div class="metric-value" id="peak-hour">--</div>
+                <div class="metric-unit"></div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="metric-title">Weekly Average</div>
+                <div class="metric-value" id="weekly-average">--</div>
+                <div class="metric-unit">cups</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-user-group"></i>
+                </div>
+                <div class="metric-title">Active Users</div>
+                <div class="metric-value" id="active-users">--</div>
+                <div class="metric-unit"></div>
+            </div>
+        </div>
+
+        <div class="machine-status">
+            <h3 class="card-title">Machine Status</h3>
+            <div class="status-grid" id="status-grid">
+                <!-- Status items will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="action-card">
+                <h3 class="card-title">Make Coffee</h3>
+                <div class="button-grid">
+                    <button class="action-btn primary" onclick="makeCoffee('regular')">
+                        <i class="fas fa-mug-hot"></i> Regular
+                    </button>
+                    <button class="action-btn primary" onclick="makeCoffee('espresso')">
+                        <i class="fas fa-coffee"></i> Espresso
+                    </button>
+                    <button class="action-btn primary" onclick="makeCoffee('latte')">
+                        <i class="fas fa-mug-hot"></i> Latte
+                    </button>
+                    <button class="action-btn primary" onclick="makeCoffee('cappuccino')">
+                        <i class="fas fa-coffee"></i> Cappuccino
+                    </button>
+                </div>
+                
+                <h4>Quick Actions</h4>
+                <div class="button-grid">
+                    <button class="action-btn warning" onclick="scheduleMaintenance('cleaning')">
+                        <i class="fas fa-broom"></i> Schedule Cleaning
+                    </button>
+                    <button class="action-btn success" onclick="loadData()">
+                        <i class="fas fa-sync"></i> Refresh Status
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h3 class="card-title">Refill Supplies</h3>
+                <div class="refill-controls" id="refill-controls">
+                    <!-- Refill controls will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h3 class="card-title">Recent Coffee Orders</h3>
+            <ul class="activity-list" id="recent-orders">
+                <!-- Recent orders will be populated by JavaScript -->
+            </ul>
+        </div>
+    </div>
+
+    <button class="refresh-btn" id="refresh-btn" title="Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        class CoffeePortal {
+            constructor() {
+                this.apiBase = '';
+                this.updateInterval = 30000; // 30 seconds
+                this.isUpdating = false;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadData();
+                this.startAutoUpdate();
+            }
+
+            bindEvents() {
+                document.getElementById('refresh-btn').addEventListener('click', () => {
+                    this.loadData();
+                });
+            }
+
+            async loadData() {
+                if (this.isUpdating) return;
+                
+                this.isUpdating = true;
+                const refreshBtn = document.getElementById('refresh-btn');
+                refreshBtn.classList.add('spinning');
+
+                try {
+                    await Promise.all([
+                        this.loadMetrics(),
+                        this.loadMachineStatus(),
+                        this.loadRecentOrders()
+                    ]);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    this.showNotification('Failed to load data', 'error');
+                } finally {
+                    this.isUpdating = false;
+                    refreshBtn.classList.remove('spinning');
+                }
+            }
+
+            async loadMetrics() {
+                try {
+                    const response = await fetch('/api/metrics');
+                    const metrics = await response.json();
+                    
+                    document.getElementById('coffee-today').textContent = metrics.coffee_today;
+                    document.getElementById('peak-hour').textContent = metrics.peak_hour;
+                    document.getElementById('weekly-average').textContent = metrics.weekly_average;
+                    document.getElementById('active-users').textContent = metrics.active_users;
+                } catch (error) {
+                    console.error('Error loading metrics:', error);
+                }
+            }
+
+            async loadMachineStatus() {
+                try {
+                    const response = await fetch('/api/machine-status');
+                    const status = await response.json();
+                    
+                    this.renderMachineStatus(status);
+                    this.renderRefillControls(status);
+                } catch (error) {
+                    console.error('Error loading machine status:', error);
+                }
+            }
+
+            async loadRecentOrders() {
+                try {
+                    const response = await fetch('/api/recent-orders');
+                    const orders = await response.json();
+                    
+                    this.renderRecentOrders(orders);
+                } catch (error) {
+                    console.error('Error loading recent orders:', error);
+                }
+            }
+
+            renderMachineStatus(status) {
+                const statusGrid = document.getElementById('status-grid');
+                statusGrid.innerHTML = '';
+
+                for (const [key, item] of Object.entries(status)) {
+                    const statusItem = document.createElement('div');
+                    statusItem.className = 'status-item';
+                    
+                    const colorClass = item.level > 70 ? 'success' : 
+                                     item.level > 30 ? 'warning' : 'danger';
+                    
+                    statusItem.innerHTML = `
+                        <div class="status-header">
+                            <span class="status-label">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                            <span class="status-percentage">${Math.round(item.level)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${colorClass}" style="width: ${item.level}%"></div>
+                        </div>
+                        <div class="status-message ${colorClass}">${item.status}</div>
+                    `;
+                    
+                    statusGrid.appendChild(statusItem);
+                }
+            }
+
+            renderRefillControls(status) {
+                const refillControls = document.getElementById('refill-controls');
+                refillControls.innerHTML = '';
+
+                for (const [key, item] of Object.entries(status)) {
+                    if (['coffee_beans', 'water_level', 'milk', 'cups_remaining'].includes(key)) {
+                        const refillItem = document.createElement('div');
+                        refillItem.className = 'refill-item';
+                        
+                        refillItem.innerHTML = `
+                            <span>${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                            <button class="refill-btn" onclick="coffePortal.refillItem('${key}')">
+                                Refill to 100%
+                            </button>
+                        `;
+                        
+                        refillControls.appendChild(refillItem);
+                    }
+                }
+            }
+
+            renderRecentOrders(orders) {
+                const ordersList = document.getElementById('recent-orders');
+                ordersList.innerHTML = '';
+
+                if (orders.length === 0) {
+                    ordersList.innerHTML = '<li class="activity-item"><div class="activity-info">No recent orders</div></li>';
+                    return;
+                }
+
+                orders.reverse().slice(0, 10).forEach(order => {
+                    const orderItem = document.createElement('li');
+                    orderItem.className = 'activity-item';
+                    
+                    const orderTime = new Date(order.timestamp).toLocaleTimeString();
+                    
+                    orderItem.innerHTML = `
+                        <div class="activity-info">
+                            <div class="activity-type">${order.type.charAt(0).toUpperCase() + order.type.slice(1)} Coffee</div>
+                            <div class="activity-time">Order #${order.id} at ${orderTime}</div>
+                        </div>
+                        <span class="status-badge completed">Completed</span>
+                    `;
+                    
+                    ordersList.appendChild(orderItem);
+                });
+            }
+
+            async refillItem(item) {
+                try {
+                    const response = await fetch('/api/refill', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ item: item, amount: 100 })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showNotification(result.message, 'success');
+                        this.loadMachineStatus();
+                    } else {
+                        this.showNotification(result.error, 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Failed to refill item', 'error');
+                }
+            }
+
+            showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            startAutoUpdate() {
+                setInterval(() => {
+                    if (!this.isUpdating) {
+                        this.loadData();
+                    }
+                }, this.updateInterval);
+            }
+        }
+
+        // Global functions for button events
+        let coffePortal;
+
+        async function makeCoffee(type) {
+            try {
+                const response = await fetch('/api/make-coffee', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type: type })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    coffePortal.showNotification(result.message, 'success');
+                    coffePortal.loadData();
+                } else {
+                    coffePortal.showNotification(result.error, 'error');
+                }
+            } catch (error) {
+                coffePortal.showNotification('Failed to make coffee', 'error');
+            }
+        }
+
+        async function scheduleMaintenance(type) {
+            try {
+                const response = await fetch('/api/maintenance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type: type })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    coffePortal.showNotification(result.message, 'success');
+                } else {
+                    coffePortal.showNotification(result.error, 'error');
+                }
+            } catch (error) {
+                coffePortal.showNotification('Failed to schedule maintenance', 'error');
+            }
+        }
+
+        // Initialize the portal when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            coffePortal = new CoffeePortal();
+        });
+    </script>
+</body>
+</html>

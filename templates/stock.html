@@ -1,0 +1,723 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Management — Office Manager{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/pages/stock.css" />
+{% endblock %}
+
+{% block header %}
+<header class="stock-header">
+  <div class="header-content">
+    <div class="header-text">
+      <h1><i class="fas fa-boxes-stacked"></i> Stock Management</h1>
+      <p class="lead">Monitor inventory levels, track restocking alerts, and manage orders efficiently</p>
+    </div>
+    <div class="header-actions">
+      <button class="action-btn primary" id="addItemBtn">
+        <i class="fas fa-plus"></i> Add Item
+      </button>
+      <button class="action-btn secondary" id="exportBtn">
+        <i class="fas fa-download"></i> Export
+      </button>
+      <button class="action-btn refresh" id="refreshBtn">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="stock-dashboard">
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="summary-card primary">
+      <div class="card-icon">
+        <i class="fas fa-cubes"></i>
+      </div>
+      <div class="card-content">
+        <h3 class="card-value" id="totalItems">4</h3>
+        <p class="card-label">Total Items</p>
+      </div>
+    </div>
+    <div class="summary-card warning">
+      <div class="card-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="card-content">
+        <h3 class="card-value" id="lowStockItems">2</h3>
+        <p class="card-label">Low Stock Items</p>
+      </div>
+    </div>
+    <div class="summary-card success">
+      <div class="card-icon">
+        <i class="fas fa-truck"></i>
+      </div>
+      <div class="card-content">
+  <!-- Changed id to avoid clash with pending orders list -->
+  <h3 class="card-value" id="pendingOrdersCount">0</h3>
+        <p class="card-label">Pending Orders</p>
+      </div>
+    </div>
+    <div class="summary-card info">
+      <div class="card-icon">
+        <i class="fas fa-map-marker-alt"></i>
+      </div>
+      <div class="card-content">
+        <h3 class="card-value" id="totalLocations">4</h3>
+        <p class="card-label">Locations</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts Section -->
+  <div class="alerts-section" id="alertsSection">
+    <div class="section-header">
+      <h3><i class="fas fa-bell"></i> Restocking Alerts</h3>
+      <span class="alert-count">2 items need attention</span>
+    </div>
+    <div class="alerts-container">
+      <div class="alert-card urgent" data-item="Coffee Beans">
+        <div class="alert-content">
+          <div class="alert-item">
+            <i class="fas fa-coffee"></i>
+            <span class="item-name">Coffee Beans</span>
+          </div>
+          <div class="alert-status">
+            <span class="status-badge critical">Critical - Only 3 left</span>
+            <span class="recommendation">Recommended: Order 10kg</span>
+          </div>
+        </div>
+        <button class="alert-action-btn" onclick="StockManager.quickOrder('Coffee Beans', 10, 'kg')">
+          <i class="fas fa-shopping-cart"></i> Order Now
+        </button>
+      </div>
+      <div class="alert-card warning" data-item="Paper">
+        <div class="alert-content">
+          <div class="alert-item">
+            <i class="fas fa-file-alt"></i>
+            <span class="item-name">Paper</span>
+          </div>
+          <div class="alert-status">
+            <span class="status-badge low">Low - 2 packs left</span>
+            <span class="recommendation">Recommended: Order 5 packs</span>
+          </div>
+        </div>
+        <button class="alert-action-btn" onclick="StockManager.quickOrder('Printer Paper', 5, 'packs')">
+          <i class="fas fa-shopping-cart"></i> Order Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Table -->
+  <div class="inventory-section">
+    <div class="section-header">
+      <h3><i class="fas fa-warehouse"></i> Current Inventory</h3>
+      <div class="table-actions">
+        <button class="action-btn secondary" id="bulkActionsBtn">
+          <i class="fas fa-tasks"></i> Bulk Actions
+        </button>
+      </div>
+    </div>
+    
+    <div class="table-container" id="tableView">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectAll" name="selectAll" aria-label="Select all items" title="Select all items"></th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Last Updated</th>
+            <th>Supplier</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTableBody">
+          <tr data-item="Coffee Beans" data-qty="3" data-location="Kitchen" data-status="Critical">
+            <td><input type="checkbox" class="item-checkbox" data-item="Coffee Beans"></td>
+            <td>
+              <div class="item-cell">
+                <div class="item-icon coffee">
+                  <i class="fas fa-coffee"></i>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">Coffee Beans</span>
+                  <span class="item-sku">SKU: CB001</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="quantity-cell">
+                <span class="quantity-value">3</span>
+                <span class="quantity-unit">kg</span>
+              </div>
+            </td>
+            <td>
+              <span class="location-badge kitchen">
+                <i class="fas fa-utensils"></i> Kitchen
+              </span>
+            </td>
+            <td>
+              <span class="status-badge critical">
+                <i class="fas fa-exclamation-triangle"></i> Critical
+              </span>
+            </td>
+            <td>
+              <div class="date-cell">
+                <span class="date-main">Oct 25, 2025</span>
+                <span class="date-time">2:30 PM</span>
+              </div>
+            </td>
+            <td>
+              <span class="supplier-link">Bean Co.</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn primary sm" onclick="restockItem('Coffee Beans')" title="Restock">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button class="action-btn secondary sm" onclick="editItem('Coffee Beans')" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn danger sm" onclick="removeItem('Coffee Beans')" title="Remove">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr data-item="Milk" data-qty="10" data-location="Fridge" data-status="OK">
+            <td><input type="checkbox" class="item-checkbox" data-item="Milk"></td>
+            <td>
+              <div class="item-cell">
+                <div class="item-icon milk">
+                  <i class="fas fa-glass-whiskey"></i>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">Milk</span>
+                  <span class="item-sku">SKU: MK001</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="quantity-cell">
+                <span class="quantity-value">10</span>
+                <span class="quantity-unit">liters</span>
+              </div>
+            </td>
+            <td>
+              <span class="location-badge fridge">
+                <i class="fas fa-snowflake"></i> Fridge
+              </span>
+            </td>
+            <td>
+              <span class="status-badge ok">
+                <i class="fas fa-check-circle"></i> OK
+              </span>
+            </td>
+            <td>
+              <div class="date-cell">
+                <span class="date-main">Oct 26, 2025</span>
+                <span class="date-time">9:15 AM</span>
+              </div>
+            </td>
+            <td>
+              <span class="supplier-link">Dairy Fresh</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn primary sm" onclick="restockItem('Milk')" title="Restock">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button class="action-btn secondary sm" onclick="editItem('Milk')" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn danger sm" onclick="removeItem('Milk')" title="Remove">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr data-item="Filters" data-qty="25" data-location="Store" data-status="OK">
+            <td><input type="checkbox" class="item-checkbox" data-item="Filters"></td>
+            <td>
+              <div class="item-cell">
+                <div class="item-icon filters">
+                  <i class="fas fa-filter"></i>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">Coffee Filters</span>
+                  <span class="item-sku">SKU: CF001</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="quantity-cell">
+                <span class="quantity-value">25</span>
+                <span class="quantity-unit">pieces</span>
+              </div>
+            </td>
+            <td>
+              <span class="location-badge store">
+                <i class="fas fa-store"></i> Store
+              </span>
+            </td>
+            <td>
+              <span class="status-badge ok">
+                <i class="fas fa-check-circle"></i> OK
+              </span>
+            </td>
+            <td>
+              <div class="date-cell">
+                <span class="date-main">Oct 24, 2025</span>
+                <span class="date-time">11:45 AM</span>
+              </div>
+            </td>
+            <td>
+              <span class="supplier-link">Office Plus</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn primary sm" onclick="restockItem('Filters')" title="Restock">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button class="action-btn secondary sm" onclick="editItem('Filters')" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn danger sm" onclick="removeItem('Filters')" title="Remove">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr data-item="Paper" data-qty="2" data-location="Storage" data-status="Low">
+            <td><input type="checkbox" class="item-checkbox" data-item="Paper"></td>
+            <td>
+              <div class="item-cell">
+                <div class="item-icon paper">
+                  <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">Printer Paper</span>
+                  <span class="item-sku">SKU: PP001</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="quantity-cell">
+                <span class="quantity-value">2</span>
+                <span class="quantity-unit">packs</span>
+              </div>
+            </td>
+            <td>
+              <span class="location-badge storage">
+                <i class="fas fa-archive"></i> Storage
+              </span>
+            </td>
+            <td>
+              <span class="status-badge low">
+                <i class="fas fa-exclamation-circle"></i> Low
+              </span>
+            </td>
+            <td>
+              <div class="date-cell">
+                <span class="date-main">Oct 23, 2025</span>
+                <span class="date-time">3:20 PM</span>
+              </div>
+            </td>
+            <td>
+              <span class="supplier-link">Paper World</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn primary sm" onclick="restockItem('Paper')" title="Restock">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button class="action-btn secondary sm" onclick="editItem('Paper')" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn danger sm" onclick="removeItem('Paper')" title="Remove">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Grid View (Hidden by default) -->
+    <div class="grid-container hidden" id="gridView">
+      <div class="inventory-grid">
+        <!-- Grid items will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Management Section -->
+  <div class="order-section">
+    <div class="section-header">
+      <h3><i class="fas fa-shopping-cart"></i> Order Management</h3>
+      <button class="action-btn primary" id="createOrderBtn">
+        <i class="fas fa-plus"></i> Create Order
+      </button>
+    </div>
+    
+    <div class="order-container">
+      <div id="orderPartialContainer" class="order-form-container">
+        <!-- Enhanced order form will be inserted here -->
+        <div class="loading-placeholder">
+          <i class="fas fa-spinner fa-spin"></i> Loading order form...
+        </div>
+      </div>
+      
+      <div class="pending-orders-container">
+        <h4><i class="fas fa-clock"></i> Pending Orders</h4>
+  <!-- Renamed from pendingOrders to pendingOrdersList to separate list from count -->
+  <div id="pendingOrdersList" class="pending-orders">
+          <!-- Pending orders will be added here dynamically -->
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No pending orders</p>
+            <span>Your orders will appear here</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Modals -->
+<!-- Item Detail Modal -->
+<div id="detailModal" class="modern-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Item Details</h3>
+      <button class="modal-close" id="modalClose" aria-label="Close dialog" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- Content will be populated dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Create Order Modal -->
+<div id="createOrderModal" class="modern-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-shopping-cart"></i> Create New Order</h3>
+      <button class="modal-close" id="createOrderClose" aria-label="Close dialog" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="createOrderForm" class="modern-form">
+        <div class="form-group">
+          <label for="orderItemName">Item Name <span style="color: red;">*</span></label>
+          <input type="text" id="orderItemName" name="orderItemName" placeholder="e.g., Coffee Beans, Milk, Paper" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="orderQuantity">Quantity <span style="color: red;">*</span></label>
+            <input type="number" id="orderQuantity" name="orderQuantity" min="0.01" step="0.01" placeholder="e.g., 5, 2.5" required>
+          </div>
+          <div class="form-group">
+            <label for="orderUnit">Unit <span style="color: red;">*</span></label>
+            <select id="orderUnit" name="orderUnit" required>
+              <option value="">Select unit</option>
+              <optgroup label="Weight">
+                <option value="grams">Grams (g)</option>
+                <option value="kg">Kilograms (kg)</option>
+                <option value="tons">Tons (t)</option>
+              </optgroup>
+              <optgroup label="Volume">
+                <option value="ml">Milliliters (ml)</option>
+                <option value="liters">Liters (L)</option>
+              </optgroup>
+              <optgroup label="Quantity">
+                <option value="pieces">Pieces</option>
+                <option value="units">Units</option>
+                <option value="packs">Packs</option>
+                <option value="boxes">Boxes</option>
+                <option value="cartons">Cartons</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="orderSupplier">Supplier/Retailer <span style="color: red;">*</span></label>
+            <select id="orderSupplier" name="orderSupplier" required>
+              <option value="">Select supplier</option>
+              <optgroup label="Major Retailers">
+                <option value="Pick N Pay">Pick N Pay</option>
+                <option value="Checkers">Checkers</option>
+                <option value="Shoprite">Shoprite</option>
+                <option value="Woolworths">Woolworths</option>
+                <option value="Spar">Spar</option>
+                <option value="Makro">Makro</option>
+              </optgroup>
+              <optgroup label="Wholesalers">
+                <option value="Massmart">Massmart</option>
+                <option value="Bidvest">Bidvest</option>
+                <option value="Cash & Carry">Cash & Carry</option>
+              </optgroup>
+              <optgroup label="Specialty">
+                <option value="Office National">Office National</option>
+                <option value="Takealot">Takealot</option>
+                <option value="Other">Other</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="orderCategory">Category</label>
+            <select id="orderCategory" name="orderCategory">
+              <option value="">Select category</option>
+              <option value="Food & Beverage">Food & Beverage</option>
+              <option value="Office Supplies">Office Supplies</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Equipment">Equipment</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="orderPriority">Priority <span style="color: red;">*</span></label>
+            <select id="orderPriority" name="orderPriority" required>
+              <option value="normal">Normal</option>
+              <option value="urgent">Urgent</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="orderEstimatedCost">Estimated Cost (R)</label>
+            <input type="number" id="orderEstimatedCost" name="orderEstimatedCost" min="0" step="0.01" placeholder="e.g., 250.00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="orderNotes">Notes/Special Instructions</label>
+          <textarea id="orderNotes" name="orderNotes" rows="3" placeholder="e.g., Brand preference, delivery instructions..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="action-btn secondary" id="cancelOrderBtn">Cancel</button>
+          <button type="submit" class="action-btn primary">
+            <i class="fas fa-shopping-cart"></i> Place Order
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Order Modal -->
+<div id="quickOrderModal" class="modern-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Quick Order</h3>
+      <button class="modal-close" id="quickOrderClose" aria-label="Close dialog" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="quickOrderForm" class="modern-form">
+        <div class="form-group">
+          <label for="quickOrderItem">Item</label>
+          <input type="text" id="quickOrderItem" readonly>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quickOrderQuantity">Quantity</label>
+            <input type="number" id="quickOrderQuantity" min="1" required>
+          </div>
+          <div class="form-group">
+            <label for="quickOrderSupplier">Supplier</label>
+            <select id="quickOrderSupplier" required>
+              <option value="">Select supplier</option>
+              <option value="Pick N Pay">Pick N Pay</option>
+              <option value="Checkers">Checkers</option>
+              <option value="Shoprite">Shoprite</option>
+              <option value="Woolworths">Woolworths</option>
+              <option value="Spar">Spar</option>
+              <option value="Makro">Makro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="quickOrderPriority">Priority</label>
+          <select id="quickOrderPriority" required>
+            <option value="normal">Normal</option>
+            <option value="urgent">Urgent</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="action-btn secondary">Cancel</button>
+          <button type="submit" class="action-btn primary">
+            <i class="fas fa-shopping-cart"></i> Place Order
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modern-modal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Export Orders Report</h3>
+      <button class="modal-close" id="exportModalClose" aria-label="Close dialog" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="exportForm" class="modern-form">
+        <div class="form-group">
+          <label for="exportPeriod">Time Period</label>
+          <select id="exportPeriod" required>
+            <option value="week">This Week (Last 7 Days)</option>
+            <option value="month">This Month (Last 30 Days)</option>
+            <option value="all">All Orders</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <p style="margin: 10px 0; color: #666; font-size: 0.9em;">
+            <i class="fas fa-info-circle"></i> Report will be downloaded as CSV file (opens in Excel/Sheets)
+          </p>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="action-btn secondary" id="cancelExportBtn">Cancel</button>
+          <button type="submit" class="action-btn primary">
+            <i class="fas fa-download"></i> Download CSV Report
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Item Modal -->
+<div id="addItemModal" class="modern-modal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add New Stock Item</h3>
+      <button class="modal-close" id="addItemModalClose" aria-label="Close dialog" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="addItemForm" class="modern-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="itemName">Item Name *</label>
+            <input type="text" id="itemName" required placeholder="e.g., Coffee Beans">
+          </div>
+          <div class="form-group">
+            <label for="itemSKU">SKU</label>
+            <input type="text" id="itemSKU" placeholder="Auto-generated if empty">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="itemQuantity">Quantity *</label>
+            <input type="number" id="itemQuantity" required min="0" step="0.01" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label for="itemUnit">Unit *</label>
+            <select id="itemUnit" required>
+              <option value="">Select Unit</option>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="g">Grams (g)</option>
+              <option value="L">Liters (L)</option>
+              <option value="ml">Milliliters (ml)</option>
+              <option value="packs">Packs</option>
+              <option value="boxes">Boxes</option>
+              <option value="units">Units</option>
+              <option value="pieces">Pieces</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="itemCategory">Category</label>
+            <select id="itemCategory">
+              <option value="">Select Category</option>
+              <option value="Beverages">Beverages</option>
+              <option value="Food">Food</option>
+              <option value="Supplies">Supplies</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Office">Office</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="itemLocation">Location</label>
+            <select id="itemLocation">
+              <option value="">Select Location</option>
+              <option value="Kitchen">Kitchen</option>
+              <option value="Fridge">Fridge</option>
+              <option value="Store">Store</option>
+              <option value="Storage">Storage</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="itemReorderPoint">Reorder Point</label>
+            <input type="number" id="itemReorderPoint" min="0" step="0.01" placeholder="Minimum quantity">
+          </div>
+          <div class="form-group">
+            <label for="itemUnitCost">Unit Cost (R)</label>
+            <input type="number" id="itemUnitCost" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="itemSupplier">Supplier</label>
+          <select id="itemSupplier">
+            <option value="">Select Supplier</option>
+            <option value="Makro">Makro</option>
+            <option value="Spar">Spar</option>
+            <option value="Checkers">Checkers</option>
+            <option value="Takealot">Takealot</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="itemDescription">Description</label>
+          <textarea id="itemDescription" rows="3" placeholder="Optional description..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="action-btn secondary" id="cancelAddItemBtn">Cancel</button>
+          <button type="submit" class="action-btn primary">
+            <i class="fas fa-plus"></i> Add Item
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/stock_final.js"></script>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Coffee Machine — Office Manager{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/pages/coffee.css" />
+{% endblock %}
+
+{% block header %}
+<header class="main-header">
+  <h1>Coffee Machine</h1>
+  <p class="lead">Monitor coffee usage and machine status</p>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="cards">
+  <div class="card metric">
+    <div class="card-title">Coffee Today</div>
+    <div class="metric-value">
+      <span id="coffee_today">47</span><span class="muted">cups</span>
+    </div>
+    <div class="card-icon"><i class="fa-solid fa-mug-hot"></i></div>
+  </div>
+  <div class="card metric">
+    <div class="card-title">Peak Hour</div>
+    <div class="metric-value">9:00 AM</div>
+    <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
+  </div>
+  <div class="card metric">
+    <div class="card-title">Weekly Average</div>
+    <div class="metric-value">52 <span class="muted">cups</span></div>
+    <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+  </div>
+  <div class="card metric">
+    <div class="card-title">Active Users</div>
+    <div class="metric-value">24</div>
+    <div class="card-icon"><i class="fa-solid fa-user-group"></i></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Machine Status</h3>
+  <div class="machine-grid">
+    <div class="col">
+      <div class="progress-row">
+        <div>Coffee Beans</div>
+        <div class="progress">
+          <div id="pb-coffee" class="progress-bar" data-value="12"></div>
+        </div>
+        <div class="muted">12%</div>
+      </div>
+      <div id="note-coffee" class="small-note">⚠️ Low - Refill needed</div>
+
+      <div class="progress-row">
+        <div>Water Level</div>
+        <div class="progress">
+          <div id="pb-water" class="progress-bar" data-value="68"></div>
+        </div>
+        <div class="muted">68%</div>
+      </div>
+      <div id="note-water" class="small-note">✓ Good</div>
+
+      <div class="progress-row">
+        <div>Milk</div>
+        <div class="progress">
+          <div id="pb-milk" class="progress-bar" data-value="45"></div>
+        </div>
+        <div class="muted">45%</div>
+      </div>
+      <div id="note-milk" class="small-note">⚠️ Medium</div>
+    </div>
+
+    <div class="col">
+      <div class="progress-row">
+        <div>Cups Remaining</div>
+        <div class="progress">
+          <div id="pb-cups" class="progress-bar" data-value="82"></div>
+        </div>
+        <div class="muted">82%</div>
+      </div>
+      <div id="note-cups" class="small-note">✓ Good</div>
+
+      <div class="progress-row">
+        <div>Cleaning Status</div>
+        <div class="progress">
+          <div id="pb-cleaning" class="progress-bar" data-value="92"></div>
+        </div>
+        <div class="muted">92%</div>
+      </div>
+      <div id="note-cleaning" class="small-note">✓ Next cleaning in 8 days</div>
+
+      <div class="progress-row">
+        <div>Machine Health</div>
+        <div class="progress">
+          <div id="pb-health" class="progress-bar" data-value="95"></div>
+        </div>
+        <div class="muted">95%</div>
+      </div>
+      <div id="note-health" class="small-note">✓ Excellent</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Set progress bar widths from data attributes
+  document.querySelectorAll('.progress-bar').forEach(bar => {
+    const value = bar.getAttribute('data-value');
+    if (value) {
+      bar.style.width = value + '%';
+    }
+  });
+});
+</script>
+{% endblock %}

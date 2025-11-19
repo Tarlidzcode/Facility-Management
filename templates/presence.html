@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Presence Tracking — Office Manager{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="/static/css/pages/presence.css" />
+{% endblock %}
+{% block header %}
+<header class="main-header presence-header">
+  <div class="header-content">
+    <div>
+      <h1>Presence Tracking</h1>
+      <p class="lead" id="presenceCount">Loading...</p>
+    </div>
+    <div class="header-actions">
+      <button id="refreshBtn" class="btn btn-icon" title="Refresh">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+{% endblock %}
+{% block content %}
+<div id="loadingIndicator" class="loading-indicator" style="display: none;">
+  <div class="spinner"></div>
+</div>
+
+<div class="card presence-card">
+  <div class="card-header">
+    <h3>Current Presence</h3>
+    <div class="card-actions">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search employees...">
+      </div>
+    </div>
+  </div>
+  <div class="presence-grid">
+    <!-- Dynamically populated by JavaScript -->
+  </div>
+</div>
+
+<!-- include safety partial -->
+{% include 'presence/safety.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/presence.js"></script>
+{% endblock %}

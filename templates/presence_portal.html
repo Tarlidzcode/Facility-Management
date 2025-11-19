@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presence Management Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #17a2b8;
+            --primary-dark: #138496;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f0fcfe;
+            --card-bg: #ffffff;
+            --text-primary: #333333;
+            --text-muted: #6c757d;
+            --border-color: #b8e6eb;
+            --shadow: 0 2px 10px rgba(23,162,184,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quick-action-btn {
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .quick-action-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn i {
+            margin-right: 8px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .summary-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        .person-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .person-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .person-item:last-child {
+            border-bottom: none;
+        }
+
+        .person-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .person-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .person-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .person-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .person-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .status-indicator.present {
+            background: var(--success-color);
+        }
+
+        .status-indicator.absent {
+            background: var(--text-muted);
+        }
+
+        .status-indicator.visitor {
+            background: var(--warning-color);
+        }
+
+        .full-width-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .history-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-danger {
+            padding: 8px 16px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .emergency-section {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .emergency-btn {
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .emergency-btn:hover {
+            background: white;
+            color: #ff6b6b;
+        }
+
+        .safety-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .safety-metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .refresh-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.success { background: var(--success-color); }
+        .notification.error { background: var(--danger-color); }
+        .notification.warning { background: var(--warning-color); color: #333; }
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .summary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-users"></i> Presence Management Portal</h1>
+            <p>Monitor office presence and manage visitor access</p>
+        </div>
+
+        <div class="quick-actions">
+            <button class="quick-action-btn" id="check-in-btn">
+                <i class="fas fa-sign-in-alt"></i> Check In
+            </button>
+            <button class="quick-action-btn" id="check-out-btn">
+                <i class="fas fa-sign-out-alt"></i> Check Out
+            </button>
+            <button class="quick-action-btn" id="register-visitor-btn">
+                <i class="fas fa-user-plus"></i> Register Visitor
+            </button>
+            <button class="quick-action-btn" id="emergency-btn">
+                <i class="fas fa-exclamation-triangle"></i> Emergency
+            </button>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-title">Present Today</div>
+                <div class="summary-value" id="present-count">--</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-title">Total Employees</div>
+                <div class="summary-value" id="total-employees">--</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-title">Visitors</div>
+                <div class="summary-value" id="visitor-count">--</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-title">Occupancy Rate</div>
+                <div class="summary-value" id="occupancy-rate">--%</div>
+            </div>
+        </div>
+
+        <div class="emergency-section">
+            <h3><i class="fas fa-shield-alt"></i> Safety Dashboard</h3>
+            <p>Current Status: All Clear</p>
+            <div class="safety-metrics">
+                <div class="safety-metric">
+                    <div class="metric-value" id="evacuation-time">4:30</div>
+                    <div class="metric-label">Est. Evacuation</div>
+                </div>
+                <div class="safety-metric">
+                    <div class="metric-value" id="max-capacity">50</div>
+                    <div class="metric-label">Max Capacity</div>
+                </div>
+                <div class="safety-metric">
+                    <div class="metric-value" id="emergency-exits">6</div>
+                    <div class="metric-label">Emergency Exits</div>
+                </div>
+                <div class="safety-metric">
+                    <div class="metric-value" id="last-drill">30d</div>
+                    <div class="metric-label">Last Drill</div>
+                </div>
+            </div>
+            <button class="emergency-btn" id="evacuation-btn">
+                <i class="fas fa-bell"></i> Start Evacuation
+            </button>
+            <button class="emergency-btn" id="lockdown-btn">
+                <i class="fas fa-lock"></i> Lockdown Mode
+            </button>
+        </div>
+
+        <div class="content-grid">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">Currently Present</h3>
+                    <span id="present-indicator">●</span>
+                </div>
+                <div class="section-content">
+                    <div class="person-list" id="present-list">
+                        <!-- Present people will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">Today's Visitors</h3>
+                    <span id="visitor-indicator">●</span>
+                </div>
+                <div class="section-content">
+                    <div class="person-list" id="visitor-list">
+                        <!-- Visitors will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="full-width-section">
+            <div class="tabs">
+                <button class="tab active" data-tab="activity">Recent Activity</button>
+                <button class="tab" data-tab="history">Presence History</button>
+                <button class="tab" data-tab="reports">Safety Reports</button>
+            </div>
+
+            <div class="tab-content active" id="activity-content">
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Person</th>
+                                <th>Action</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activity-table-body">
+                            <!-- Activity data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="history-content">
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Employee</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <!-- History data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="reports-content">
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Event Type</th>
+                                <th>Description</th>
+                                <th>Response Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table-body">
+                            <!-- Safety reports will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check In/Out Modal -->
+    <div class="modal" id="checkin-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="checkin-modal-title">Check In</h3>
+                <button class="close-btn" id="close-checkin-modal">&times;</button>
+            </div>
+            <form id="checkin-form">
+                <div class="form-group">
+                    <label class="form-label" for="employee-id">Employee ID or Name:</label>
+                    <input type="text" class="form-input" id="employee-id" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="location">Location:</label>
+                    <select class="form-select" id="location" required>
+                        <option value="">Select Location</option>
+                        <option value="Main Entrance">Main Entrance</option>
+                        <option value="Office Floor 1">Office Floor 1</option>
+                        <option value="Office Floor 2">Office Floor 2</option>
+                        <option value="Conference Room">Conference Room</option>
+                        <option value="Reception">Reception</option>
+                    </select>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn-secondary" id="cancel-checkin">Cancel</button>
+                    <button type="submit" class="btn-primary" id="submit-checkin">Check In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Visitor Registration Modal -->
+    <div class="modal" id="visitor-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Register Visitor</h3>
+                <button class="close-btn" id="close-visitor-modal">&times;</button>
+            </div>
+            <form id="visitor-form">
+                <div class="form-group">
+                    <label class="form-label" for="visitor-name">Visitor Name:</label>
+                    <input type="text" class="form-input" id="visitor-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="visitor-company">Company:</label>
+                    <input type="text" class="form-input" id="visitor-company">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="visitor-purpose">Purpose of Visit:</label>
+                    <input type="text" class="form-input" id="visitor-purpose" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="host-employee">Host Employee:</label>
+                    <input type="text" class="form-input" id="host-employee" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="visitor-duration">Expected Duration (hours):</label>
+                    <input type="number" class="form-input" id="visitor-duration" min="0.5" step="0.5" value="1">
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn-secondary" id="cancel-visitor">Cancel</button>
+                    <button type="submit" class="btn-primary">Register Visitor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Emergency Modal -->
+    <div class="modal" id="emergency-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="color: var(--danger-color);">Emergency Procedures</h3>
+                <button class="close-btn" id="close-emergency-modal">&times;</button>
+            </div>
+            <div>
+                <p><strong>Current occupancy:</strong> <span id="emergency-occupancy">--</span> people</p>
+                <p><strong>Estimated evacuation time:</strong> <span id="emergency-evac-time">--</span> minutes</p>
+                
+                <div style="margin: 20px 0;">
+                    <h4>Emergency Actions:</h4>
+                    <button class="btn-danger" style="margin: 5px;" onclick="presencePortal.triggerEmergency('fire')">
+                        <i class="fas fa-fire"></i> Fire Alarm
+                    </button>
+                    <button class="btn-danger" style="margin: 5px;" onclick="presencePortal.triggerEmergency('medical')">
+                        <i class="fas fa-heartbeat"></i> Medical Emergency
+                    </button>
+                    <button class="btn-danger" style="margin: 5px;" onclick="presencePortal.triggerEmergency('security')">
+                        <i class="fas fa-shield-alt"></i> Security Alert
+                    </button>
+                    <button class="btn-danger" style="margin: 5px;" onclick="presencePortal.triggerEmergency('evacuation')">
+                        <i class="fas fa-bell"></i> Full Evacuation
+                    </button>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="button" class="btn-secondary" id="cancel-emergency">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" id="refresh-btn" title="Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        class PresencePortal {
+            constructor() {
+                this.apiBase = '';
+                this.updateInterval = 30000;
+                this.isUpdating = false;
+                this.currentTab = 'activity';
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadData();
+                this.startAutoUpdate();
+            }
+
+            bindEvents() {
+                // Quick action buttons
+                document.getElementById('check-in-btn').addEventListener('click', () => {
+                    this.showCheckInModal('in');
+                });
+                document.getElementById('check-out-btn').addEventListener('click', () => {
+                    this.showCheckInModal('out');
+                });
+                document.getElementById('register-visitor-btn').addEventListener('click', () => {
+                    this.showVisitorModal();
+                });
+                document.getElementById('emergency-btn').addEventListener('click', () => {
+                    this.showEmergencyModal();
+                });
+
+                // Modal events
+                document.getElementById('close-checkin-modal').addEventListener('click', () => {
+                    this.hideCheckInModal();
+                });
+                document.getElementById('cancel-checkin').addEventListener('click', () => {
+                    this.hideCheckInModal();
+                });
+                document.getElementById('close-visitor-modal').addEventListener('click', () => {
+                    this.hideVisitorModal();
+                });
+                document.getElementById('cancel-visitor').addEventListener('click', () => {
+                    this.hideVisitorModal();
+                });
+                document.getElementById('close-emergency-modal').addEventListener('click', () => {
+                    this.hideEmergencyModal();
+                });
+                document.getElementById('cancel-emergency').addEventListener('click', () => {
+                    this.hideEmergencyModal();
+                });
+
+                // Form submissions
+                document.getElementById('checkin-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.processCheckIn();
+                });
+                document.getElementById('visitor-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.registerVisitor();
+                });
+
+                // Tab switching
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.switchTab(e.target.dataset.tab);
+                    });
+                });
+
+                // Refresh button
+                document.getElementById('refresh-btn').addEventListener('click', () => {
+                    this.loadData();
+                });
+            }
+
+            async loadData() {
+                if (this.isUpdating) return;
+                
+                this.isUpdating = true;
+                const refreshBtn = document.getElementById('refresh-btn');
+                refreshBtn.classList.add('spinning');
+
+                try {
+                    await Promise.all([
+                        this.loadSummary(),
+                        this.loadPresentPeople(),
+                        this.loadVisitors(),
+                        this.loadActivity(),
+                        this.loadHistory(),
+                        this.loadSafetyReports()
+                    ]);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    this.showNotification('Failed to load data', 'error');
+                } finally {
+                    this.isUpdating = false;
+                    refreshBtn.classList.remove('spinning');
+                }
+            }
+
+            async loadSummary() {
+                try {
+                    const response = await fetch('/api/summary');
+                    const summary = await response.json();
+                    
+                    document.getElementById('present-count').textContent = summary.present_today;
+                    document.getElementById('total-employees').textContent = summary.total_employees;
+                    document.getElementById('visitor-count').textContent = summary.visitors_today;
+                    document.getElementById('occupancy-rate').textContent = summary.occupancy_rate + '%';
+                    
+                    // Update emergency info
+                    document.getElementById('emergency-occupancy').textContent = summary.total_present;
+                    document.getElementById('emergency-evac-time').textContent = summary.evacuation_time;
+                } catch (error) {
+                    console.error('Error loading summary:', error);
+                }
+            }
+
+            async loadPresentPeople() {
+                try {
+                    const response = await fetch('/api/present');
+                    const people = await response.json();
+                    
+                    const container = document.getElementById('present-list');
+                    container.innerHTML = '';
+                    
+                    if (people.length === 0) {
+                        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No one currently present</p>';
+                        return;
+                    }
+                    
+                    people.forEach(person => {
+                        const personDiv = document.createElement('div');
+                        personDiv.className = 'person-item';
+                        personDiv.innerHTML = `
+                            <div class="person-info">
+                                <div class="person-avatar">${person.name.charAt(0)}</div>
+                                <div class="person-details">
+                                    <div class="person-name">${person.name}</div>
+                                    <div class="person-time">Since ${person.check_in_time}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span style="font-size: 0.8rem; color: var(--text-muted)">${person.location}</span>
+                                <div class="status-indicator present"></div>
+                            </div>
+                        `;
+                        container.appendChild(personDiv);
+                    });
+                } catch (error) {
+                    console.error('Error loading present people:', error);
+                }
+            }
+
+            async loadVisitors() {
+                try {
+                    const response = await fetch('/api/visitors');
+                    const visitors = await response.json();
+                    
+                    const container = document.getElementById('visitor-list');
+                    container.innerHTML = '';
+                    
+                    if (visitors.length === 0) {
+                        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No visitors today</p>';
+                        return;
+                    }
+                    
+                    visitors.forEach(visitor => {
+                        const visitorDiv = document.createElement('div');
+                        visitorDiv.className = 'person-item';
+                        visitorDiv.innerHTML = `
+                            <div class="person-info">
+                                <div class="person-avatar">${visitor.name.charAt(0)}</div>
+                                <div class="person-details">
+                                    <div class="person-name">${visitor.name}</div>
+                                    <div class="person-time">Host: ${visitor.host}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span style="font-size: 0.8rem; color: var(--text-muted)">${visitor.company}</span>
+                                <div class="status-indicator visitor"></div>
+                                <button class="btn-danger" style="margin-left: 10px; font-size: 0.7rem;" onclick="presencePortal.checkOutVisitor(${visitor.id})">
+                                    Check Out
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(visitorDiv);
+                    });
+                } catch (error) {
+                    console.error('Error loading visitors:', error);
+                }
+            }
+
+            async loadActivity() {
+                try {
+                    const response = await fetch('/api/activity');
+                    const activities = await response.json();
+                    
+                    const tbody = document.getElementById('activity-table-body');
+                    tbody.innerHTML = '';
+                    
+                    activities.forEach(activity => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${activity.time}</td>
+                            <td>${activity.person}</td>
+                            <td><span class="status-badge ${activity.action.toLowerCase()}">${activity.action}</span></td>
+                            <td>${activity.location}</td>
+                            <td>${activity.type}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error loading activity:', error);
+                }
+            }
+
+            async loadHistory() {
+                try {
+                    const response = await fetch('/api/history');
+                    const history = await response.json();
+                    
+                    const tbody = document.getElementById('history-table-body');
+                    tbody.innerHTML = '';
+                    
+                    history.forEach(entry => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${entry.date}</td>
+                            <td>${entry.employee}</td>
+                            <td>${entry.check_in || '-'}</td>
+                            <td>${entry.check_out || '-'}</td>
+                            <td>${entry.duration || '-'}</td>
+                            <td><span class="status-badge ${entry.status.toLowerCase()}">${entry.status}</span></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error loading history:', error);
+                }
+            }
+
+            async loadSafetyReports() {
+                try {
+                    const response = await fetch('/api/safety-reports');
+                    const reports = await response.json();
+                    
+                    const tbody = document.getElementById('reports-table-body');
+                    tbody.innerHTML = '';
+                    
+                    reports.forEach(report => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${report.date}</td>
+                            <td>${report.event_type}</td>
+                            <td>${report.description}</td>
+                            <td>${report.response_time}</td>
+                            <td><span class="status-badge ${report.status.toLowerCase()}">${report.status}</span></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error loading safety reports:', error);
+                }
+            }
+
+            switchTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+                
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tabName}-content`).classList.add('active');
+                
+                this.currentTab = tabName;
+            }
+
+            showCheckInModal(action) {
+                const modal = document.getElementById('checkin-modal');
+                const title = document.getElementById('checkin-modal-title');
+                const submitBtn = document.getElementById('submit-checkin');
+                
+                title.textContent = action === 'in' ? 'Check In' : 'Check Out';
+                submitBtn.textContent = action === 'in' ? 'Check In' : 'Check Out';
+                submitBtn.dataset.action = action;
+                
+                modal.style.display = 'block';
+            }
+
+            hideCheckInModal() {
+                document.getElementById('checkin-modal').style.display = 'none';
+                document.getElementById('checkin-form').reset();
+            }
+
+            showVisitorModal() {
+                document.getElementById('visitor-modal').style.display = 'block';
+            }
+
+            hideVisitorModal() {
+                document.getElementById('visitor-modal').style.display = 'none';
+                document.getElementById('visitor-form').reset();
+            }
+
+            showEmergencyModal() {
+                document.getElementById('emergency-modal').style.display = 'block';
+            }
+
+            hideEmergencyModal() {
+                document.getElementById('emergency-modal').style.display = 'none';
+            }
+
+            async processCheckIn() {
+                try {
+                    const action = document.getElementById('submit-checkin').dataset.action;
+                    const employeeId = document.getElementById('employee-id').value;
+                    const location = document.getElementById('location').value;
+
+                    const response = await fetch('/api/checkin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            employee_id: employeeId,
+                            action: action,
+                            location: location
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showNotification(result.message, 'success');
+                        this.hideCheckInModal();
+                        this.loadData();
+                    } else {
+                        this.showNotification(result.error, 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Failed to process check-in', 'error');
+                }
+            }
+
+            async registerVisitor() {
+                try {
+                    const visitorData = {
+                        name: document.getElementById('visitor-name').value,
+                        company: document.getElementById('visitor-company').value,
+                        purpose: document.getElementById('visitor-purpose').value,
+                        host: document.getElementById('host-employee').value,
+                        duration: parseFloat(document.getElementById('visitor-duration').value)
+                    };
+
+                    const response = await fetch('/api/visitors', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(visitorData)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showNotification(result.message, 'success');
+                        this.hideVisitorModal();
+                        this.loadData();
+                    } else {
+                        this.showNotification(result.error, 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Failed to register visitor', 'error');
+                }
+            }
+
+            async checkOutVisitor(visitorId) {
+                try {
+                    if (!confirm('Check out this visitor?')) return;
+
+                    const response = await fetch(`/api/visitors/${visitorId}/checkout`, {
+                        method: 'POST'
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showNotification(result.message, 'success');
+                        this.loadData();
+                    } else {
+                        this.showNotification(result.error, 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Failed to check out visitor', 'error');
+                }
+            }
+
+            async triggerEmergency(type) {
+                try {
+                    if (!confirm(`Are you sure you want to trigger a ${type} emergency alert?`)) return;
+
+                    const response = await fetch('/api/emergency', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ type: type })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showNotification(`${type.toUpperCase()} emergency alert activated!`, 'warning');
+                        this.hideEmergencyModal();
+                        this.loadData();
+                    } else {
+                        this.showNotification(result.error, 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('Failed to trigger emergency alert', 'error');
+                }
+            }
+
+            showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            startAutoUpdate() {
+                setInterval(() => {
+                    if (!this.isUpdating) {
+                        this.loadData();
+                    }
+                }, this.updateInterval);
+            }
+        }
+
+        // Global reference for button events
+        let presencePortal;
+
+        // Initialize the portal when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            presencePortal = new PresencePortal();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+
+{% block title %}Meeting Room Climate Control{% endblock %}
+
+{% block styles %}
+<style>
+    .rooms-container {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 30px;
+    }
+
+    .page-header h1 {
+        margin: 0 0 8px 0;
+        color: #132529;
+        font-size: 2em;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: var(--muted);
+    }
+
+    .floor-section {
+        margin-bottom: 40px;
+    }
+
+    .floor-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .floor-header h2 {
+        margin: 0;
+        color: var(--accent);
+        font-size: 1.5em;
+    }
+
+    .floor-badge {
+        background: var(--accent);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .rooms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 20px;
+    }
+
+    .room-card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .room-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .room-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 20px;
+    }
+
+    .room-title {
+        margin: 0 0 4px 0;
+        font-size: 1.2em;
+        color: #132529;
+        font-weight: 600;
+    }
+
+    .room-capacity {
+        color: var(--muted);
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .comfort-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .comfort-comfortable {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .comfort-moderate {
+        background: #fff3e0;
+        color: #ef6c00;
+    }
+
+    .comfort-uncomfortable {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .temp-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding: 16px;
+        background: var(--glass);
+        border-radius: 8px;
+    }
+
+    .temp-current {
+        flex: 1;
+    }
+
+    .temp-label {
+        font-size: 0.85em;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .temp-value {
+        font-size: 2em;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .temp-unit {
+        font-size: 0.6em;
+        font-weight: 400;
+    }
+
+    .humidity-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: rgba(75, 137, 184, 0.1);
+        border-radius: 8px;
+    }
+
+    .humidity-indicator i {
+        color: var(--blue);
+    }
+
+    .humidity-value {
+        font-weight: 600;
+        color: var(--blue-dark);
+    }
+
+    .temp-controls {
+        margin-bottom: 16px;
+    }
+
+    .temp-control-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 0.9em;
+        color: #132529;
+        font-weight: 500;
+    }
+
+    .target-temp {
+        font-size: 1.1em;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .temp-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: linear-gradient(to right, #4b89b8 0%, #94c88e 50%, #ff6b6b 100%);
+        outline: none;
+        -webkit-appearance: none;
+        margin-bottom: 12px;
+    }
+
+    .temp-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .temp-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border: none;
+    }
+
+    .temp-range {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8em;
+        color: var(--muted);
+    }
+
+    .hvac-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.9em;
+        font-weight: 500;
+    }
+
+    .hvac-auto {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .hvac-heating {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+
+    .hvac-cooling {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .hvac-off {
+        background: #f5f5f5;
+        color: var(--muted);
+    }
+
+    .hvac-status i {
+        font-size: 1.1em;
+    }
+
+    .last-adjusted {
+        text-align: center;
+        font-size: 0.8em;
+        color: var(--muted);
+        margin-top: 12px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: var(--muted);
+    }
+
+    .loading i {
+        font-size: 2em;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .rooms-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rooms-container">
+    <div class="page-header">
+        <h1><i class="fas fa-door-open"></i> Meeting Room Climate Control</h1>
+        <p>Manage temperature and climate settings for all meeting rooms across both floors</p>
+    </div>
+
+    <div id="roomsContent" class="loading">
+        <i class="fas fa-spinner"></i>
+        <p>Loading rooms...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let rooms = [];
+
+function getComfortIcon(status) {
+    switch(status) {
+        case 'comfortable': return 'fa-smile';
+        case 'moderate': return 'fa-meh';
+        case 'uncomfortable': return 'fa-frown';
+        default: return 'fa-question';
+    }
+}
+
+function getHvacIcon(status) {
+    switch(status) {
+        case 'heating': return 'fa-fire';
+        case 'cooling': return 'fa-snowflake';
+        case 'auto': return 'fa-magic';
+        default: return 'fa-power-off';
+    }
+}
+
+function formatLastAdjusted(timestamp) {
+    if (!timestamp) return 'Never adjusted';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000); // seconds
+    
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+    return date.toLocaleDateString();
+}
+
+function createRoomCard(room) {
+    const comfortClass = `comfort-${room.comfort_status}`;
+    const hvacClass = `hvac-${room.hvac_status}`;
+    
+    return `
+        <div class="room-card" data-room-id="${room.id}">
+            <div class="room-header">
+                <div>
+                    <h3 class="room-title">${room.name}</h3>
+                    <div class="room-capacity">
+                        <i class="fas fa-users"></i>
+                        <span>Capacity: ${room.capacity || 'N/A'}</span>
+                    </div>
+                </div>
+                <span class="comfort-badge ${comfortClass}">
+                    <i class="fas ${getComfortIcon(room.comfort_status)}"></i>
+                    ${room.comfort_status}
+                </span>
+            </div>
+
+            <div class="temp-display">
+                <div class="temp-current">
+                    <div class="temp-label">Current Temperature</div>
+                    <div class="temp-value">
+                        ${room.current_temperature?.toFixed(1) || '--'}
+                        <span class="temp-unit">°C</span>
+                    </div>
+                </div>
+                <div class="humidity-indicator">
+                    <i class="fas fa-tint"></i>
+                    <span class="humidity-value">${room.humidity?.toFixed(0) || '--'}%</span>
+                </div>
+            </div>
+
+            <div class="temp-controls">
+                <div class="temp-control-label">
+                    <span>Target Temperature</span>
+                    <span class="target-temp" id="target-${room.id}">${room.target_temperature?.toFixed(1) || '22.0'}°C</span>
+                </div>
+                <input 
+                    type="range" 
+                    class="temp-slider" 
+                    id="slider-${room.id}"
+                    min="16" 
+                    max="30" 
+                    step="0.5" 
+                    value="${room.target_temperature || 22}"
+                    onchange="adjustTemperature(${room.id}, this.value)"
+                    oninput="updateTargetDisplay(${room.id}, this.value)"
+                >
+                <div class="temp-range">
+                    <span>16°C</span>
+                    <span>23°C</span>
+                    <span>30°C</span>
+                </div>
+            </div>
+
+            <div class="hvac-status ${hvacClass}">
+                <i class="fas ${getHvacIcon(room.hvac_status)}"></i>
+                <span>HVAC: ${room.hvac_status.toUpperCase()}</span>
+            </div>
+
+            <div class="last-adjusted" id="adjusted-${room.id}">
+                Last adjusted: ${formatLastAdjusted(room.last_adjusted)}
+            </div>
+        </div>
+    `;
+}
+
+function updateTargetDisplay(roomId, value) {
+    document.getElementById(`target-${roomId}`).textContent = `${parseFloat(value).toFixed(1)}°C`;
+}
+
+function adjustTemperature(roomId, targetTemp) {
+    fetch(`/api/rooms/${roomId}/temperature`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            target_temperature: parseFloat(targetTemp)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the last adjusted time
+            document.getElementById(`adjusted-${roomId}`).textContent = 'Last adjusted: Just now';
+            
+            // Show success feedback
+            const card = document.querySelector(`[data-room-id="${roomId}"]`);
+            card.style.boxShadow = '0 4px 20px rgba(31, 111, 97, 0.3)';
+            setTimeout(() => {
+                card.style.boxShadow = '';
+            }, 1000);
+            
+            // Reload data after a short delay to get updated HVAC status
+            setTimeout(loadRooms, 1000);
+        } else {
+            alert('Error adjusting temperature: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to adjust temperature');
+    });
+}
+
+function renderRooms() {
+    const container = document.getElementById('roomsContent');
+    
+    if (rooms.length === 0) {
+        container.innerHTML = '<div class="loading"><p>No meeting rooms found. Please seed the database first.</p></div>';
+        return;
+    }
+
+    // Group rooms by floor
+    const roomsByFloor = rooms.reduce((acc, room) => {
+        if (!acc[room.floor]) acc[room.floor] = [];
+        acc[room.floor].push(room);
+        return acc;
+    }, {});
+
+    // Sort floors
+    const floors = Object.keys(roomsByFloor).sort((a, b) => parseInt(a) - parseInt(b));
+
+    let html = '';
+    floors.forEach(floor => {
+        const floorRooms = roomsByFloor[floor];
+        html += `
+            <div class="floor-section">
+                <div class="floor-header">
+                    <h2>Floor ${floor}</h2>
+                    <span class="floor-badge">${floorRooms.length} Rooms</span>
+                </div>
+                <div class="rooms-grid">
+                    ${floorRooms.map(room => createRoomCard(room)).join('')}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function loadRooms() {
+    fetch('/api/rooms')
+        .then(response => response.json())
+        .then(data => {
+            rooms = data;
+            renderRooms();
+        })
+        .catch(error => {
+            console.error('Error loading rooms:', error);
+            document.getElementById('roomsContent').innerHTML = 
+                '<div class="loading"><p>Error loading rooms. Please try again.</p></div>';
+        });
+}
+
+// Load rooms on page load and refresh every 30 seconds
+loadRooms();
+setInterval(loadRooms, 30000);
+</script>
+{% endblock %}

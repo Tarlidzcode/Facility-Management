@@ -1,0 +1,135 @@
+{% set classes = {
+    'employee': {
+        'bg': '#16636a',
+        'badge_bg': '#16636a'
+    },
+    'visitor': {
+        'bg': '#fff3ea',
+        'badge_bg': '#6aa07f'
+    }
+} %}
+
+<div class="card presence-safety">
+  <div class="top">
+    <div>
+      <h3>Visitor Safety & Emergency</h3>
+      <p class="muted">Monitor visitors and emergency headcount</p>
+    </div>
+    <div class="safety-controls">
+      <button id="checkInBtn" class="btn checkin-btn">Check In Visitor</button>
+      <button id="emergencyBtn" class="btn btn-danger">Emergency Mode</button>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card small">
+      <div class="label">Total in Building</div>
+      <div class="value" id="totalInBuilding">0</div>
+      <div class="muted">Employees + Visitors</div>
+    </div>
+    <div class="card small">
+      <div class="label">Visitors Today</div>
+      <div class="value" id="visitorsToday">0</div>
+      <div class="muted" id="visitorsInsideMuted">0 currently inside</div>
+    </div>
+    <div class="card small">
+      <div class="label">Safety Compliance</div>
+      <div class="value" id="safetyCompliance">100%</div>
+      <div class="muted">All visitors logged</div>
+    </div>
+  </div>
+
+  <div class="banner" id="emergencyBanner" role="status">
+    <strong id="bannerTitle">EMERGENCY MODE ACTIVE</strong>
+    <div id="bannerText">Building evacuation headcount system is active. Total occupants: <span id="bannerCount">0</span></div>
+  </div>
+
+  <!-- Emergency Information Section (Only visible in emergency mode) -->
+  <div id="emergencyInfo" class="emergency-info-section" style="display: none;">
+    <div class="emergency-grid">
+      <!-- Emergency Contacts -->
+      <div class="emergency-card">
+        <div class="emergency-card-header">
+          <svg class="emergency-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          <h3>Emergency Contacts</h3>
+        </div>
+        <div class="emergency-contacts-list">
+          <div class="contact-item">
+            <span class="contact-label">Emergency Services</span>
+            <span class="contact-value">911</span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-label">Building Security</span>
+            <span class="contact-value">+1-555-0911</span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-label">Fire Department</span>
+            <span class="contact-value">+1-555-0119</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assembly Points -->
+      <div class="emergency-card">
+        <div class="emergency-card-header">
+          <svg class="emergency-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <h3>Assembly Points</h3>
+        </div>
+        <div class="assembly-points-list">
+          <div class="assembly-item">
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>North Parking Lot (Primary)</span>
+          </div>
+          <div class="assembly-item">
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>South Garden (Secondary)</span>
+          </div>
+          <div class="assembly-item">
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>East Plaza (Tertiary)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Safety Status -->
+      <div class="emergency-card">
+        <div class="emergency-card-header">
+          <svg class="emergency-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <h3>Safety Status</h3>
+        </div>
+        <div class="safety-status-list">
+          <div class="status-item">
+            <span class="status-label">Fire Alarms</span>
+            <span class="status-badge operational">Operational</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Exit Routes</span>
+            <span class="status-badge clear">Clear</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Last Drill</span>
+            <span class="status-value">Oct 1, 2025</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>All Occupants in Building <span id="occupantBadge" class="status-badge">0 People</span></h3>
+    <div id="occupantList" class="occupant-list"></div>
+  </div>
+</div>

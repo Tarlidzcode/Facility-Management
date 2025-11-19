@@ -1,0 +1,2041 @@
+{% extends 'base.html' %}
+
+{% block title %}Temperature Management{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/temperature.css') }}">
+<style>
+    .temp-container {
+        padding: 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 30px;
+    }
+
+    .page-header h1 {
+        margin: 0 0 8px 0;
+        color: #132529;
+        font-size: 2em;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: var(--muted);
+    }
+
+    /* Tab Navigation */
+    .tab-navigation {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab-btn {
+        padding: 12px 24px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--muted);
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+        color: var(--accent);
+    }
+
+    .tab-btn.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Outdoor Comparison Styles */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        transition: transform 0.2s, box-shadow 0.2s;
+        min-height: 400px;
+    }
+
+    .chart-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .chart-container h3 {
+        margin: 0 0 20px 0;
+        color: #132529;
+        font-size: 1.3em;
+        font-weight: 600;
+    }
+
+    .chart-container canvas {
+        max-height: 400px;
+    }
+
+    .kpi-container {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        transition: transform 0.2s, box-shadow 0.2s;
+        min-height: 400px;
+    }
+
+    .kpi-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .kpi-container h3 {
+        margin: 0 0 20px 0;
+        color: #132529;
+        font-size: 1.3em;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .kpi-pie-wrapper {
+        position: relative;
+        height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .kpi-pie-wrapper canvas {
+        max-height: 250px !important;
+        max-width: 250px !important;
+    }
+
+    .kpi-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .kpi-stat {
+        text-align: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+
+    .kpi-stat:hover {
+        background: #e9ecef;
+    }
+
+    .kpi-stat-label {
+        font-size: 0.85em;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .kpi-stat-value {
+        font-size: 1.4em;
+        font-weight: 600;
+        color: #132529;
+    }
+
+    .stats-container {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        transition: transform 0.2s, box-shadow 0.2s;
+        min-height: 400px;
+    }
+
+    .stats-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .stats-container h3 {
+        margin: 0 0 20px 0;
+        color: #132529;
+        font-size: 1.3em;
+        font-weight: 600;
+    }
+
+    .stats-container canvas {
+        max-height: 350px;
+    }
+
+    .temperature-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .temperature-card h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+    }
+
+    .temperature-difference {
+        font-size: 1.2em;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+
+    .difference-high {
+        background-color: #ffe0e0;
+        color: #d32f2f;
+    }
+
+    .difference-normal {
+        background-color: #e0f2e9;
+        color: #2e7d32;
+    }
+
+    .weather-condition {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .weather-condition i {
+        margin-right: 8px;
+    }
+
+    /* Meeting Rooms Styles */
+    .floor-section {
+        margin-bottom: 40px;
+    }
+
+    .floor-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .floor-header h2 {
+        margin: 0;
+        color: var(--accent);
+        font-size: 1.5em;
+    }
+
+    .floor-badge {
+        background: var(--accent);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .rooms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+
+    .room-card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .room-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .room-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 16px;
+    }
+
+    .room-title {
+        margin: 0 0 4px 0;
+        font-size: 1.1em;
+        color: #132529;
+        font-weight: 600;
+    }
+
+    .room-capacity {
+        color: var(--muted);
+        font-size: 0.85em;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .comfort-badge {
+        padding: 5px 10px;
+        border-radius: 16px;
+        font-size: 0.8em;
+        font-weight: 600;
+    }
+
+    .comfort-comfortable {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .comfort-moderate {
+        background: #fff3e0;
+        color: #ef6c00;
+    }
+
+    .comfort-uncomfortable {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .temp-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding: 14px;
+        background: var(--glass);
+        border-radius: 8px;
+    }
+
+    .temp-current {
+        flex: 1;
+    }
+
+    .temp-label {
+        font-size: 0.8em;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .temp-value {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .temp-unit {
+        font-size: 0.6em;
+        font-weight: 400;
+    }
+
+    .humidity-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        background: rgba(75, 137, 184, 0.1);
+        border-radius: 8px;
+    }
+
+    .humidity-indicator i {
+        color: var(--blue);
+    }
+
+    .humidity-value {
+        font-weight: 600;
+        color: var(--blue-dark);
+        font-size: 0.9em;
+    }
+
+    .temp-controls {
+        margin-bottom: 14px;
+    }
+
+    .temp-control-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 0.85em;
+        color: #132529;
+        font-weight: 500;
+    }
+
+    .target-temp {
+        font-size: 1em;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .temp-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: linear-gradient(to right, #4b89b8 0%, #94c88e 50%, #ff6b6b 100%);
+        outline: none;
+        -webkit-appearance: none;
+        margin-bottom: 10px;
+    }
+
+    .temp-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .temp-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border: none;
+    }
+
+    .temp-range {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75em;
+        color: var(--muted);
+    }
+
+    .hvac-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+
+    .hvac-auto {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .hvac-heating {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+
+    .hvac-cooling {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .hvac-off {
+        background: #f5f5f5;
+        color: var(--muted);
+    }
+
+    .hvac-status i {
+        font-size: 1em;
+    }
+
+    @media (max-width: 768px) {
+        .rooms-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Floor Control Styles */
+    .floor-control-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 1200px) {
+        .floor-control-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .floor-control-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+
+    .floor-control-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+
+    .floor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .floor-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .floor-title i {
+        font-size: 28px;
+        color: #667eea;
+    }
+
+    .floor-title h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #2d3748;
+    }
+
+    .floor-badge {
+        background: #e0e7ff;
+        color: #667eea;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .floor-status-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .floor-status-badge i {
+        font-size: 10px;
+    }
+
+    .status-good {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-moderate {
+        background: #fed7aa;
+        color: #92400e;
+    }
+
+    .floor-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+        .floor-metrics-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .floor-metric {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+    }
+
+    .floor-metric:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .metric-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+    }
+
+    .temp-icon {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    }
+
+    .humidity-icon {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .range-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    .metric-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .metric-label {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .metric-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .floor-control-panel {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 2px solid #bae6fd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .floor-control-panel h3 {
+        margin: 0 0 20px 0;
+        color: #0c4a6e;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .control-slider-group {
+        margin-bottom: 20px;
+    }
+
+    .control-slider-group label {
+        display: block;
+        margin-bottom: 12px;
+        color: #0c4a6e;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .control-slider-group label span {
+        color: #0284c7;
+        font-size: 18px;
+    }
+
+    .floor-temp-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: linear-gradient(to right, #3b82f6 0%, #22c55e 50%, #ef4444 100%);
+        outline: none;
+        -webkit-appearance: none;
+        margin-bottom: 8px;
+    }
+
+    .floor-temp-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        border: 3px solid #0284c7;
+    }
+
+    .floor-temp-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        border: 3px solid #0284c7;
+    }
+
+    .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 15px;
+    }
+
+    .apply-floor-btn {
+        width: 100%;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .apply-floor-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .apply-floor-btn:active {
+        transform: scale(0.98);
+    }
+
+    .floor-note {
+        margin: 15px 0 0 0;
+        font-size: 13px;
+        color: #475569;
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .floor-note i {
+        margin-top: 2px;
+        color: #0284c7;
+    }
+
+    .floor-hvac-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .hvac-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .hvac-indicator.cooling {
+        color: #0284c7;
+    }
+
+    .hvac-indicator.cooling i {
+        animation: pulse 2s infinite;
+    }
+
+    .hvac-indicator.idle {
+        color: #64748b;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .hvac-efficiency {
+        font-size: 13px;
+        color: #475569;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="temp-container">
+    <div class="page-header">
+        <h1><i class="fas fa-thermometer-half"></i> Temperature Management</h1>
+        <p>Monitor outdoor conditions and control indoor climate across all meeting rooms</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="switchTab('outdoor', event)">
+            <i class="fas fa-cloud-sun"></i> Outdoor Comparison
+        </button>
+        <button class="tab-btn" onclick="switchTab('rooms', event)">
+            <i class="fas fa-door-open"></i> Meeting Room Control
+        </button>
+        <button class="tab-btn" onclick="switchTab('floor', event)">
+            <i class="fas fa-building"></i> Floor Control
+        </button>
+    </div>
+
+    <!-- Outdoor Comparison Tab -->
+    <div id="outdoor-tab" class="tab-content active">
+        <div id="officeSelector" class="form-group" style="margin-bottom: 20px;">
+            <label for="office">Select Office:</label>
+            <select id="office" class="form-control" style="max-width: 300px; padding: 8px; border-radius: 4px; border: 1px solid #ddd;"></select>
+        </div>
+
+        <!-- Main Line Chart (Full Width) -->
+        <div class="chart-container" style="margin-bottom: 20px;">
+            <h3><i class="fas fa-chart-line"></i> Temperature Comparison (Last 24 Hours)</h3>
+            <canvas id="temperatureChart" style="width: 100%; height: 400px;"></canvas>
+        </div>
+
+        <!-- Grid Layout for KPIs and Stats -->
+        <div class="dashboard-grid">
+            <!-- Current Conditions - Pie Chart -->
+            <div class="kpi-container">
+                <h3><i class="fas fa-chart-pie"></i> Current Conditions</h3>
+                <div class="kpi-pie-wrapper">
+                    <canvas id="kpiPieChart"></canvas>
+                </div>
+                <div class="kpi-stats">
+                    <div class="kpi-stat">
+                        <div class="kpi-stat-label">Indoor Temp</div>
+                        <div class="kpi-stat-value" id="kpiIndoorTemp">--°C</div>
+                    </div>
+                    <div class="kpi-stat">
+                        <div class="kpi-stat-label">Outdoor Temp</div>
+                        <div class="kpi-stat-value" id="kpiOutdoorTemp">--°C</div>
+                    </div>
+                    <div class="kpi-stat">
+                        <div class="kpi-stat-label">Indoor Humidity</div>
+                        <div class="kpi-stat-value" id="kpiIndoorHumidity">--%</div>
+                    </div>
+                    <div class="kpi-stat">
+                        <div class="kpi-stat-label">Outdoor Humidity</div>
+                        <div class="kpi-stat-value" id="kpiOutdoorHumidity">--%</div>
+                    </div>
+                </div>
+                <div id="weatherCondition" style="text-align: center; margin-top: 15px; font-size: 1.1em; color: #666;">
+                    <i class="fas fa-sun"></i> <span>--</span>
+                </div>
+            </div>
+
+            <!-- Statistics - Bar Chart -->
+            <div class="stats-container">
+                <h3><i class="fas fa-chart-bar"></i> Statistics (24h)</h3>
+                <canvas id="statsBarChart" style="width: 100%; height: 350px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meeting Rooms Tab -->
+    <div id="rooms-tab" class="tab-content">
+        <div id="roomsContent" style="text-align: center; padding: 40px; color: var(--muted);">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2em;"></i>
+            <p>Loading meeting rooms...</p>
+        </div>
+    </div>
+
+    <!-- Floor Control Tab -->
+    <div id="floor-tab" class="tab-content">
+        <div class="floor-control-container">
+            <!-- Floor 1 Control -->
+            <div class="floor-control-card">
+                <div class="floor-header">
+                    <div class="floor-title">
+                        <i class="fas fa-building"></i>
+                        <h2>Floor 1</h2>
+                        <span class="floor-badge">3 Rooms</span>
+                    </div>
+                    <div class="floor-status-badge status-moderate">
+                        <i class="fas fa-circle"></i> Moderate
+                    </div>
+                </div>
+
+                <div class="floor-metrics-grid">
+                    <div class="floor-metric">
+                        <div class="metric-icon temp-icon">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-label">Average Temperature</span>
+                            <span class="metric-value" id="floor1-avg-temp">23.5°C</span>
+                        </div>
+                    </div>
+                    <div class="floor-metric">
+                        <div class="metric-icon humidity-icon">
+                            <i class="fas fa-droplet"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-label">Average Humidity</span>
+                            <span class="metric-value" id="floor1-avg-humidity">48%</span>
+                        </div>
+                    </div>
+                    <div class="floor-metric">
+                        <div class="metric-icon range-icon">
+                            <i class="fas fa-arrows-left-right"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-label">Temperature Range</span>
+                            <span class="metric-value" id="floor1-temp-range">22.0°C - 24.1°C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="floor-control-panel">
+                    <h3><i class="fas fa-sliders"></i> Floor-Wide Temperature Control</h3>
+                    <div class="control-slider-group">
+                        <label for="floor1-target">Target Temperature: <span id="floor1-target-display">22.0°C</span></label>
+                        <input type="range" id="floor1-target" class="floor-temp-slider" min="16" max="30" step="0.5" value="22">
+                        <div class="slider-labels">
+                            <span>16°C</span>
+                            <span>23°C</span>
+                            <span>30°C</span>
+                        </div>
+                    </div>
+                    <button class="apply-floor-btn" onclick="applyFloorSettings(1)">
+                        <i class="fas fa-check-circle"></i> Apply to All Rooms on Floor 1
+                    </button>
+                    <p class="floor-note"><i class="fas fa-info-circle"></i> This will update target temperature for: Boardroom A, Conference Room B, Meeting Room C</p>
+                </div>
+
+                <div class="floor-hvac-status">
+                    <div class="hvac-indicator cooling">
+                        <i class="fas fa-snowflake"></i>
+                        <span>HVAC: COOLING</span>
+                    </div>
+                    <div class="hvac-efficiency">
+                        <span>Energy Efficiency: 85%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floor 2 Control -->
+            <div class="floor-control-card">
+                <div class="floor-header">
+                    <div class="floor-title">
+                        <i class="fas fa-building"></i>
+                        <h2>Floor 2</h2>
+                        <span class="floor-badge">3 Rooms</span>
+                    </div>
+                    <div class="floor-status-badge status-good">
+                        <i class="fas fa-circle"></i> Good
+                    </div>
+                </div>
+
+                <div class="floor-metrics-grid">
+                    <div class="floor-metric">
+                        <div class="metric-icon temp-icon">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-label">Average Temperature</span>
+                            <span class="metric-value" id="floor2-avg-temp">22.3°C</span>
+                        </div>
+                    </div>
+                    <div class="floor-metric">
+                        <div class="metric-icon humidity-icon">
+                            <i class="fas fa-droplet"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-label">Average Humidity</span>
+                            <span class="metric-value" id="floor2-avg-humidity">45%</span>
+                        </div>
+                    </div>
+                    <div class="floor-metric">
+                        <div class="metric-icon range-icon">
+                            <i class="fas fa-arrows-left-right"></i>
+                        </div>
+                        <div class="metric-details">
+                            <span class="metric-label">Temperature Range</span>
+                            <span class="metric-value" id="floor2-temp-range">21.8°C - 23.1°C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="floor-control-panel">
+                    <h3><i class="fas fa-sliders"></i> Floor-Wide Temperature Control</h3>
+                    <div class="control-slider-group">
+                        <label for="floor2-target">Target Temperature: <span id="floor2-target-display">22.0°C</span></label>
+                        <input type="range" id="floor2-target" class="floor-temp-slider" min="16" max="30" step="0.5" value="22">
+                        <div class="slider-labels">
+                            <span>16°C</span>
+                            <span>23°C</span>
+                            <span>30°C</span>
+                        </div>
+                    </div>
+                    <button class="apply-floor-btn" onclick="applyFloorSettings(2)">
+                        <i class="fas fa-check-circle"></i> Apply to All Rooms on Floor 2
+                    </button>
+                    <p class="floor-note"><i class="fas fa-info-circle"></i> This will update target temperature for: Board Room D, Executive Room E, Training Room F</p>
+                </div>
+
+                <div class="floor-hvac-status">
+                    <div class="hvac-indicator idle">
+                        <i class="fas fa-fan"></i>
+                        <span>HVAC: IDLE</span>
+                    </div>
+                    <div class="hvac-efficiency">
+                        <span>Energy Efficiency: 92%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+console.log('=== Temperature Management JS Loading ===');
+console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+console.log('Chart version:', Chart ? Chart.version : 'N/A');
+
+// Tab switching
+function switchTab(tabName, event) {
+    console.log('Switching to tab:', tabName);
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (event && event.target) {
+        event.target.closest('.tab-btn').classList.add('active');
+    } else {
+        // Fallback: find the button by tab name
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            if (btn.getAttribute('onclick').includes(tabName)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(tabName + '-tab').classList.add('active');
+    
+    // Load data if needed
+    if (tabName === 'rooms' && !roomsLoaded) {
+        loadRooms();
+        roomsLoaded = true;
+    } else if (tabName === 'outdoor') {
+        // Reload outdoor data when switching back to this tab to ensure fresh data
+        if (temperatureChart) {
+            console.log('Outdoor tab activated - charts already exist');
+        } else {
+            console.log('Outdoor tab activated - loading data');
+            loadOutdoorData();
+        }
+    }
+}
+
+// ========== OUTDOOR COMPARISON CODE ==========
+let temperatureChart = null;
+let officeData = {};
+let chartsCreated = false; // Flag to track if charts have been created
+
+console.log('Outdoor comparison code loaded');
+
+// Animation helper function
+function animateValue(id, start, end, duration, suffix = '') {
+    const element = document.getElementById(id);
+    if (!element) return;
+    
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = current.toFixed(1) + suffix;
+    }, 16);
+}
+
+function createChart(data) {
+    try {
+        console.log('=== createChart called ===');
+        console.log('Charts already created?', chartsCreated);
+        console.log('Data object:', data);
+        console.log('Office name:', data.office_name);
+        console.log('Indoor data length:', data.indoor_data ? data.indoor_data.length : 'N/A');
+        console.log('Outdoor data length:', data.outdoor_data ? data.outdoor_data.length : 'N/A');
+        
+        const canvas = document.getElementById('temperatureChart');
+        console.log('Canvas element:', canvas);
+        console.log('Canvas found:', !!canvas);
+        
+        if (!canvas) {
+            console.error('temperatureChart canvas not found!');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        console.log('Canvas context:', ctx);
+        
+        // Only destroy if chart exists AND we're updating to different data
+        // This prevents unnecessary destruction that causes flickering
+        if (temperatureChart && typeof temperatureChart.destroy === 'function') {
+            console.log('Chart exists - updating data instead of destroying');
+            // Update existing chart data instead of destroying
+            const indoor = data.indoor_data;
+            const outdoor = data.outdoor_data;
+            
+            if (!indoor || !outdoor || indoor.length === 0 || outdoor.length === 0) {
+                console.error('Invalid data structure:', data);
+                return;
+            }
+            
+            // Get hourly data
+            const hourlyIndoor = [];
+            const hourlyOutdoor = [];
+            const pointsPerHour = Math.max(1, Math.floor(indoor.length / 24));
+            
+            for (let i = 0; i < 24; i++) {
+                const index = Math.min(i * pointsPerHour, indoor.length - 1);
+                hourlyIndoor.push(indoor[index].temperature);
+                hourlyOutdoor.push(outdoor[index].temperature);
+            }
+            
+            // Update the chart data without destroying it
+            temperatureChart.data.datasets[0].data = hourlyIndoor;
+            temperatureChart.data.datasets[1].data = hourlyOutdoor;
+            temperatureChart.update('none'); // Update without animation to be faster
+            
+            console.log('Chart data updated successfully');
+            updateCurrentConditions(data);
+            updateStats(data);
+            return;
+        }
+
+        const indoor = data.indoor_data;
+        const outdoor = data.outdoor_data;
+
+        if (!indoor || !outdoor || indoor.length === 0 || outdoor.length === 0) {
+            console.error('Invalid data structure:', data);
+            return;
+        }
+
+        // Create 24-hour labels (12am - 11pm)
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+            if (i === 0) hours.push('12am');
+            else if (i < 12) hours.push(`${i}am`);
+            else if (i === 12) hours.push('12pm');
+            else hours.push(`${i-12}pm`);
+        }
+
+        // Get hourly data (sample every hour from the dataset)
+        const hourlyIndoor = [];
+        const hourlyOutdoor = [];
+        const pointsPerHour = Math.max(1, Math.floor(indoor.length / 24));
+        
+        for (let i = 0; i < 24; i++) {
+            const index = Math.min(i * pointsPerHour, indoor.length - 1);
+            hourlyIndoor.push(indoor[index].temperature);
+            hourlyOutdoor.push(outdoor[index].temperature);
+        }
+        
+        // Create gradient backgrounds
+        const gradientIndoor = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientIndoor.addColorStop(0, 'rgba(31, 111, 97, 0.3)');
+        gradientIndoor.addColorStop(1, 'rgba(31, 111, 97, 0.01)');
+        
+        const gradientOutdoor = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientOutdoor.addColorStop(0, 'rgba(255, 99, 132, 0.3)');
+        gradientOutdoor.addColorStop(1, 'rgba(255, 99, 132, 0.01)');
+        
+        console.log('Creating temperature chart...');
+        temperatureChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: hours,
+            datasets: [{
+                label: 'Indoor Temperature',
+                data: hourlyIndoor,
+                borderColor: '#1f6f61',
+                backgroundColor: gradientIndoor,
+                borderWidth: 4,
+                tension: 0.5,
+                fill: true,
+                pointRadius: 6,
+                pointHoverRadius: 10,
+                pointBackgroundColor: '#1f6f61',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#1f6f61',
+                pointHoverBorderWidth: 4,
+                shadowOffsetX: 3,
+                shadowOffsetY: 3,
+                shadowBlur: 10,
+                shadowColor: 'rgba(31, 111, 97, 0.3)'
+            }, {
+                label: 'Outdoor Temperature',
+                data: hourlyOutdoor,
+                borderColor: '#ff6384',
+                backgroundColor: gradientOutdoor,
+                borderWidth: 4,
+                tension: 0.5,
+                fill: true,
+                pointRadius: 6,
+                pointHoverRadius: 10,
+                pointBackgroundColor: '#ff6384',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#ff6384',
+                pointHoverBorderWidth: 4,
+                shadowOffsetX: 3,
+                shadowOffsetY: 3,
+                shadowBlur: 10,
+                shadowColor: 'rgba(255, 99, 132, 0.3)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        padding: 20,
+                        font: {
+                            size: 14,
+                            weight: '600',
+                            family: "'Segoe UI', Arial, sans-serif"
+                        },
+                        color: '#2c3e50'
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    borderWidth: 1,
+                    padding: 16,
+                    displayColors: true,
+                    titleFont: {
+                        size: 15,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 14
+                    },
+                    bodySpacing: 10,
+                    cornerRadius: 8,
+                    caretSize: 8,
+                    callbacks: {
+                        title: function(context) {
+                            return 'Time: ' + context[0].label;
+                        },
+                        label: function(context) {
+                            return ' ' + context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
+                        },
+                        afterLabel: function(context) {
+                            const temp = context.parsed.y;
+                            if (temp < 18) return '❄️ Cold';
+                            if (temp < 24) return '✅ Comfortable';
+                            return '🔥 Warm';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: true,
+                        color: 'rgba(0, 0, 0, 0.06)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        },
+                        color: '#5a6c7d',
+                        padding: 10
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.06)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toFixed(0) + '°C';
+                        },
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        },
+                        color: '#5a6c7d',
+                        padding: 10
+                    }
+                }
+            }
+        }
+    });
+
+        console.log('Temperature chart created successfully');
+        chartsCreated = true; // Mark charts as created
+        
+        // Update other displays
+        updateCurrentConditions(data);
+        updateStats(data);
+    } catch (error) {
+        console.error('Error in createChart:', error);
+    }
+}
+
+function updateCurrentConditions(data) {
+    try {
+        console.log('updateCurrentConditions called');
+        const indoor = data.indoor_data[data.indoor_data.length - 1];
+        const outdoor = data.outdoor_data[data.outdoor_data.length - 1];
+        
+        if (!indoor || !outdoor) {
+            console.error('Invalid data in updateCurrentConditions');
+            return;
+        }
+        
+        // Update KPI stats with animation
+        animateValue('kpiIndoorTemp', 0, indoor.temperature, 1000, '°C');
+        animateValue('kpiOutdoorTemp', 0, outdoor.temperature, 1000, '°C');
+        animateValue('kpiIndoorHumidity', 0, indoor.humidity, 1000, '%');
+        animateValue('kpiOutdoorHumidity', 0, outdoor.humidity, 1000, '%');
+        
+        // Create Modern Doughnut Chart with Gradients
+        const pieCanvas = document.getElementById('kpiPieChart');
+        if (!pieCanvas) {
+            console.error('kpiPieChart canvas not found!');
+            return;
+        }
+        const pieCtx = pieCanvas.getContext('2d');
+        
+        // Only destroy and recreate if chart already exists (for updates)
+        // On first load, window.kpiPieChart will be undefined so this won't run
+        if (window.kpiPieChart && typeof window.kpiPieChart.destroy === 'function') {
+            console.log('Destroying existing kpiPieChart for update');
+            window.kpiPieChart.destroy();
+        }
+        
+        // Create gradient colors for pie chart
+        const gradientGreen = pieCtx.createRadialGradient(125, 125, 0, 125, 125, 125);
+        gradientGreen.addColorStop(0, 'rgba(31, 111, 97, 0.9)');
+        gradientGreen.addColorStop(1, 'rgba(31, 111, 97, 0.6)');
+        
+        const gradientPink = pieCtx.createRadialGradient(125, 125, 0, 125, 125, 125);
+        gradientPink.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
+        gradientPink.addColorStop(1, 'rgba(255, 99, 132, 0.6)');
+        
+        const gradientBlue = pieCtx.createRadialGradient(125, 125, 0, 125, 125, 125);
+        gradientBlue.addColorStop(0, 'rgba(54, 162, 235, 0.9)');
+        gradientBlue.addColorStop(1, 'rgba(54, 162, 235, 0.6)');
+        
+        const gradientYellow = pieCtx.createRadialGradient(125, 125, 0, 125, 125, 125);
+        gradientYellow.addColorStop(0, 'rgba(255, 206, 86, 0.9)');
+        gradientYellow.addColorStop(1, 'rgba(255, 206, 86, 0.6)');
+        
+        console.log('Creating pie chart...');
+        window.kpiPieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Indoor Temp', 'Outdoor Temp', 'Indoor Humidity', 'Outdoor Humidity'],
+            datasets: [{
+                data: [
+                    indoor.temperature,
+                    outdoor.temperature,
+                    indoor.humidity / 4, // Scale humidity to be visible
+                    outdoor.humidity / 4
+                ],
+                backgroundColor: [
+                    gradientGreen,
+                    gradientPink,
+                    gradientBlue,
+                    gradientYellow
+                ],
+                borderColor: '#fff',
+                borderWidth: 4,
+                hoverOffset: 20,
+                hoverBorderWidth: 5,
+                hoverBorderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1500,
+                easing: 'easeInOutQuart'
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        padding: 15,
+                        font: {
+                            size: 11,
+                            weight: '600'
+                        },
+                        color: '#2c3e50',
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            return data.labels.map((label, i) => ({
+                                text: label,
+                                fillStyle: data.datasets[0].backgroundColor[i],
+                                strokeStyle: '#fff',
+                                lineWidth: 2,
+                                hidden: false,
+                                index: i
+                            }));
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    borderWidth: 1,
+                    padding: 14,
+                    cornerRadius: 8,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label.includes('Humidity')) {
+                                return ' ' + label + ': ' + (context.parsed * 4).toFixed(0) + '%';
+                            } else {
+                                return label + ': ' + context.parsed.toFixed(1) + '°C';
+                            }
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true
+            }
+        }
+    });
+    
+        console.log('Pie chart created successfully');
+        
+        const weatherSpan = document.querySelector('#weatherCondition span');
+        if (weatherSpan) {
+            weatherSpan.textContent = outdoor.description || outdoor.conditions || 'N/A';
+        }
+    } catch (error) {
+        console.error('Error in updateCurrentConditions:', error);
+    }
+}
+
+function updateStats(data) {
+    try {
+        console.log('updateStats called');
+        function calcStats(readings) {
+            const temps = readings.map(r => r.temperature);
+            return {
+                high: Math.max(...temps),
+                low: Math.min(...temps),
+                avg: temps.reduce((a,b) => a + b, 0) / temps.length
+            };
+        }
+        
+        const indoorStats = calcStats(data.indoor_data);
+        const outdoorStats = calcStats(data.outdoor_data);
+        
+        // Create Modern 3D Bar Chart with Gradients
+        const barCanvas = document.getElementById('statsBarChart');
+        if (!barCanvas) {
+            console.error('statsBarChart canvas not found!');
+            return;
+        }
+        const barCtx = barCanvas.getContext('2d');
+        
+        // Only destroy and recreate if chart already exists (for updates)
+        // On first load, window.statsBarChart will be undefined so this won't run
+        if (window.statsBarChart && typeof window.statsBarChart.destroy === 'function') {
+            console.log('Destroying existing statsBarChart for update');
+            window.statsBarChart.destroy();
+        }
+        
+        // Create gradient backgrounds for bars
+        const gradientIndoor = barCtx.createLinearGradient(0, 0, 0, 350);
+        gradientIndoor.addColorStop(0, 'rgba(31, 111, 97, 0.9)');
+        gradientIndoor.addColorStop(1, 'rgba(31, 111, 97, 0.5)');
+        
+        const gradientOutdoor = barCtx.createLinearGradient(0, 0, 0, 350);
+        gradientOutdoor.addColorStop(0, 'rgba(255, 99, 132, 0.9)');
+        gradientOutdoor.addColorStop(1, 'rgba(255, 99, 132, 0.5)');
+        
+        console.log('Creating bar chart...');
+        window.statsBarChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['High 🔥', 'Low ❄️', 'Average ✅'],
+            datasets: [{
+                label: 'Indoor',
+                data: [indoorStats.high, indoorStats.low, indoorStats.avg],
+                backgroundColor: gradientIndoor,
+                borderColor: '#1f6f61',
+                borderWidth: 3,
+                borderRadius: 10,
+                borderSkipped: false,
+                hoverBackgroundColor: '#1f6f61',
+                hoverBorderColor: '#fff',
+                hoverBorderWidth: 4
+            }, {
+                label: 'Outdoor',
+                data: [outdoorStats.high, outdoorStats.low, outdoorStats.avg],
+                backgroundColor: gradientOutdoor,
+                borderColor: '#ff6384',
+                borderWidth: 3,
+                borderRadius: 10,
+                borderSkipped: false,
+                hoverBackgroundColor: '#ff6384',
+                hoverBorderColor: '#fff',
+                hoverBorderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            animation: {
+                duration: 1500,
+                easing: 'easeInOutQuart',
+                delay: (context) => {
+                    return context.dataIndex * 100;
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'rectRounded',
+                        padding: 20,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                            family: "'Segoe UI', Arial, sans-serif"
+                        },
+                        color: '#2c3e50'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    borderWidth: 1,
+                    padding: 14,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label.replace(/[🔥❄️✅]/g, '').trim();
+                        },
+                        label: function(context) {
+                            return ' ' + context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
+                        },
+                        afterLabel: function(context) {
+                            const temp = context.parsed.y;
+                            if (context.label.includes('High') && temp > 25) return '⚠️ Above comfort zone';
+                            if (context.label.includes('Low') && temp < 18) return '⚠️ Below comfort zone';
+                            if (context.label.includes('Average')) return '📊 Daily average';
+                            return '';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 13,
+                            weight: '600'
+                        },
+                        color: '#2c3e50',
+                        padding: 12
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.08)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toFixed(0) + '°C';
+                        },
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        },
+                        color: '#5a6c7d',
+                        padding: 10
+                    }
+                }
+            }
+        }
+    });
+        
+        console.log('Bar chart created successfully');
+    } catch (error) {
+        console.error('Error in updateStats:', error);
+    }
+}
+
+function updateOfficeSelector(data) {
+    const select = document.getElementById('office');
+    select.innerHTML = '';
+    
+    data.forEach((office, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = office.office_name;
+        select.appendChild(option);
+    });
+}
+
+function loadOutdoorData() {
+    console.log('=== Loading outdoor data ===');
+    console.log('Fetching from: /api/temperature/comparison');
+    
+    // Set a shorter timeout for more responsive behavior
+    const timeoutId = setTimeout(() => {
+        console.warn('=== API timeout, using mock data ===');
+        const mockData = createMockData();
+        officeData = [mockData];
+        updateOfficeSelector([mockData]);
+        createChart(mockData);
+    }, 3000); // Reduced to 3 second timeout for faster response
+    
+    fetch('/api/temperature/comparison')
+        .then(response => {
+            clearTimeout(timeoutId); // Cancel timeout if API responds
+            console.log('API Response status:', response.status);
+            console.log('API Response ok:', response.ok);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            clearTimeout(timeoutId); // Cancel timeout
+            console.log('=== Data received ===');
+            console.log('Data type:', typeof data);
+            console.log('Data is array:', Array.isArray(data));
+            console.log('Data length:', data.length);
+            console.log('First office:', data[0] ? data[0].office_name : 'N/A');
+            
+            officeData = data;
+            updateOfficeSelector(data);
+            if (data.length > 0) {
+                console.log('=== Calling createChart ===');
+                createChart(data[0]);
+            } else {
+                console.error('No data in response, using mock data');
+                const mockData = createMockData();
+                createChart(mockData);
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId); // Cancel timeout
+            console.error('=== Error loading temperature data ===');
+            console.error('Error type:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            
+            // Use mock data as fallback
+            console.log('=== Using mock data ===');
+            const mockData = createMockData();
+            officeData = [mockData];
+            updateOfficeSelector([mockData]);
+            createChart(mockData);
+        });
+}
+
+// Create mock data for testing
+function createMockData() {
+    const now = new Date();
+    const indoor_data = [];
+    const outdoor_data = [];
+    
+    // Generate 24 hours of data
+    for (let i = 0; i < 288; i++) { // Every 5 minutes for 24 hours
+        const time = new Date(now - (288 - i) * 5 * 60 * 1000);
+        indoor_data.push({
+            temperature: 22 + Math.sin(i / 20) * 2 + (Math.random() - 0.5) * 0.5,
+            humidity: 50 + Math.cos(i / 15) * 5 + (Math.random() - 0.5) * 2,
+            timestamp: time.toISOString()
+        });
+        outdoor_data.push({
+            temperature: 18 + Math.sin(i / 25) * 3 + (Math.random() - 0.5) * 1,
+            humidity: 65 + Math.cos(i / 18) * 8 + (Math.random() - 0.5) * 3,
+            timestamp: time.toISOString(),
+            description: i % 72 === 0 ? ['Clear Sky', 'Few Clouds', 'Scattered Clouds', 'Broken Clouds'][Math.floor(i / 72)] : outdoor_data[outdoor_data.length - 1]?.description || 'Clear Sky'
+        });
+    }
+    
+    return {
+        office_name: 'Cape Town Pinelands Office',
+        indoor_data: indoor_data,
+        outdoor_data: outdoor_data
+    };
+}
+
+// Initialize on page load
+console.log('Initializing temperature page...');
+
+// Track if already initialized to prevent double loading
+let isInitialized = false;
+
+// Start loading immediately - don't wait for Chart.js
+// Chart.js will be loaded by the time we need to render
+function initializePage() {
+    if (isInitialized) {
+        console.log('Already initialized, skipping...');
+        return;
+    }
+    isInitialized = true;
+    
+    console.log('Initializing charts - starting data fetch immediately');
+    console.log('Checking canvas elements:');
+    console.log('temperatureChart canvas:', document.getElementById('temperatureChart'));
+    console.log('kpiPieChart canvas:', document.getElementById('kpiPieChart'));
+    console.log('statsBarChart canvas:', document.getElementById('statsBarChart'));
+    
+    // Load data immediately for responsive behavior
+    loadOutdoorData();
+}
+
+// Wait for Chart.js to load before initializing
+function waitForChart() {
+    if (typeof Chart !== 'undefined') {
+        console.log('Chart.js is ready!');
+        initializePage();
+    } else {
+        console.log('Waiting for Chart.js...');
+        setTimeout(waitForChart, 50); // Check more frequently
+    }
+}
+
+// Start as soon as DOM is ready
+document.addEventListener('DOMContentLoaded', waitForChart);
+
+// Setup office selector change handler after DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    const officeSelect = document.getElementById('office');
+    if (officeSelect) {
+        officeSelect.addEventListener('change', function(e) {
+            const selectedOffice = officeData[this.value];
+            if (selectedOffice) {
+                createChart(selectedOffice);
+            }
+        });
+    }
+});
+
+// ========== MEETING ROOMS CODE ==========
+let rooms = [];
+let roomsLoaded = false;
+
+// ========== FLOOR CONTROL CODE ==========
+// Floor temperature slider handling
+document.addEventListener('DOMContentLoaded', function() {
+    // Floor 1 slider
+    const floor1Slider = document.getElementById('floor1-target');
+    const floor1Display = document.getElementById('floor1-target-display');
+    
+    if (floor1Slider && floor1Display) {
+        floor1Slider.addEventListener('input', function() {
+            floor1Display.textContent = this.value + '°C';
+        });
+    }
+    
+    // Floor 2 slider
+    const floor2Slider = document.getElementById('floor2-target');
+    const floor2Display = document.getElementById('floor2-target-display');
+    
+    if (floor2Slider && floor2Display) {
+        floor2Slider.addEventListener('input', function() {
+            floor2Display.textContent = this.value + '°C';
+        });
+    }
+});
+
+function applyFloorSettings(floorNumber) {
+    const slider = document.getElementById(`floor${floorNumber}-target`);
+    const targetTemp = slider.value;
+    
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
+    
+    // Simulate API call (in real app, this would update all rooms on the floor)
+    setTimeout(() => {
+        button.innerHTML = '<i class="fas fa-check"></i> Applied Successfully!';
+        button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        
+        console.log(`Applied ${targetTemp}°C to all rooms on Floor ${floorNumber}`);
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            button.style.background = '';
+        }, 2000);
+    }, 1000);
+}
+
+function getComfortIcon(status) {
+    switch(status) {
+        case 'comfortable': return 'fa-smile';
+        case 'moderate': return 'fa-meh';
+        case 'uncomfortable': return 'fa-frown';
+        default: return 'fa-question';
+    }
+}
+
+function getHvacIcon(status) {
+    switch(status) {
+        case 'heating': return 'fa-fire';
+        case 'cooling': return 'fa-snowflake';
+        case 'auto': return 'fa-magic';
+        default: return 'fa-power-off';
+    }
+}
+
+function createRoomCard(room) {
+    const comfortClass = `comfort-${room.comfort_status}`;
+    const hvacClass = `hvac-${room.hvac_status}`;
+    
+    return `
+        <div class="room-card" data-room-id="${room.id}">
+            <div class="room-header">
+                <div>
+                    <h3 class="room-title">${room.name}</h3>
+                    <div class="room-capacity">
+                        <i class="fas fa-users"></i>
+                        <span>Capacity: ${room.capacity || 'N/A'}</span>
+                    </div>
+                </div>
+                <span class="comfort-badge ${comfortClass}">
+                    <i class="fas ${getComfortIcon(room.comfort_status)}"></i>
+                    ${room.comfort_status}
+                </span>
+            </div>
+
+            <div class="temp-display">
+                <div class="temp-current">
+                    <div class="temp-label">Current Temperature</div>
+                    <div class="temp-value">
+                        ${room.current_temperature?.toFixed(1) || '--'}
+                        <span class="temp-unit">°C</span>
+                    </div>
+                </div>
+                <div class="humidity-indicator">
+                    <i class="fas fa-tint"></i>
+                    <span class="humidity-value">${room.humidity?.toFixed(0) || '--'}%</span>
+                </div>
+            </div>
+
+            <div class="temp-controls">
+                <div class="temp-control-label">
+                    <span>Target Temperature</span>
+                    <span class="target-temp" id="target-${room.id}">${room.target_temperature?.toFixed(1) || '22.0'}°C</span>
+                </div>
+                <input 
+                    type="range" 
+                    class="temp-slider" 
+                    id="slider-${room.id}"
+                    min="16" 
+                    max="30" 
+                    step="0.5" 
+                    value="${room.target_temperature || 22}"
+                    onchange="adjustTemperature(${room.id}, this.value)"
+                    oninput="updateTargetDisplay(${room.id}, this.value)"
+                >
+                <div class="temp-range">
+                    <span>16°C</span>
+                    <span>23°C</span>
+                    <span>30°C</span>
+                </div>
+            </div>
+
+            <div class="hvac-status ${hvacClass}">
+                <i class="fas ${getHvacIcon(room.hvac_status)}"></i>
+                <span>HVAC: ${room.hvac_status.toUpperCase()}</span>
+            </div>
+        </div>
+    `;
+}
+
+function updateTargetDisplay(roomId, value) {
+    document.getElementById(`target-${roomId}`).textContent = `${parseFloat(value).toFixed(1)}°C`;
+}
+
+function adjustTemperature(roomId, targetTemp) {
+    fetch(`/api/rooms/${roomId}/temperature`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            target_temperature: parseFloat(targetTemp)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success feedback
+            const card = document.querySelector(`[data-room-id="${roomId}"]`);
+            card.style.boxShadow = '0 4px 20px rgba(31, 111, 97, 0.3)';
+            setTimeout(() => {
+                card.style.boxShadow = '';
+            }, 1000);
+        } else {
+            alert('Error adjusting temperature: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to adjust temperature');
+    });
+}
+
+function renderRooms() {
+    const container = document.getElementById('roomsContent');
+    
+    if (rooms.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px;"><p>No meeting rooms found.</p></div>';
+        return;
+    }
+
+    // Group rooms by floor
+    const roomsByFloor = rooms.reduce((acc, room) => {
+        if (!acc[room.floor]) acc[room.floor] = [];
+        acc[room.floor].push(room);
+        return acc;
+    }, {});
+
+    // Sort floors
+    const floors = Object.keys(roomsByFloor).sort((a, b) => parseInt(a) - parseInt(b));
+
+    let html = '';
+    floors.forEach(floor => {
+        const floorRooms = roomsByFloor[floor];
+        html += `
+            <div class="floor-section">
+                <div class="floor-header">
+                    <h2>Floor ${floor}</h2>
+                    <span class="floor-badge">${floorRooms.length} Rooms</span>
+                </div>
+                <div class="rooms-grid">
+                    ${floorRooms.map(room => createRoomCard(room)).join('')}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function loadRooms() {
+    fetch('/api/rooms')
+        .then(response => response.json())
+        .then(data => {
+            rooms = data;
+            renderRooms();
+        })
+        .catch(error => {
+            console.error('Error loading rooms:', error);
+            document.getElementById('roomsContent').innerHTML = 
+                '<div style="text-align: center; padding: 40px;"><p>Error loading rooms. Please try again.</p></div>';
+        });
+}
+
+// Note: Initial load happens in initializePage() via DOMContentLoaded
+// Removed auto-refresh to prevent chart recreation issues
+</script>
+{% endblock %}
